@@ -1,0 +1,53 @@
+---
+- name: Gather Swarm together
+  hosts: all
+  remote_user: ubuntu
+  vars:
+    node0_ip: "{{ ansible_default_ipv4.address }}" # private-ip (VCN) (default)
+    # node0_ip: "{{ groups['node0'] | join('') }}" # public-ip (public net)
+
+  tasks:
+    - name: Run docker swarm init
+      when: "'node0' in group_names"
+      register: cmd_stdout
+      failed_when: cmd_stdout.stderr != ""
+      changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      ansible.builtin.shell: |
+        docker swarm init --advertise-addr {{ node0_ip }}
+
+    - name: Get swarm worker token # noqa: run-once
+      run_once: true
+      when: "'node0' in group_names"
+      register: swarm_worker_token
+      failed_when: swarm_worker_token.stderr != ""
+      changed_when: "'Error' not in swarm_worker_token.stdout_lines"
+      ansible.builtin.command: docker swarm join-token -q worker
+
+    - name: Get swarm manager token # noqa: run-once
+      run_once: true
+      when: "'node0' in group_names"
+      register: swarm_manager_token
+      failed_when: swarm_manager_token.stderr != ""
+      changed_when: "'Error' not in swarm_manager_token.stdout_lines"
+      ansible.builtin.command: docker swarm join-token -q manager
+
+    - name: Extract swarm node command # noqa: run-once
+      when: "'node0' in group_names"
+      run_once: true
+      ansible.builtin.set_fact:
+        swarm_manager_cmd: "docker swarm join --token {{ swarm_manager_token.stdout }} {{ node0_ip }}:2377"
+        swarm_worker_cmd: "docker swarm join --token {{ swarm_worker_token.stdout }} {{ node0_ip }}:2377"
+
+    - name: Join Swarm Managers
+      when: ["'managers' in group_names", "'node0' not in group_names"]
+      register: command_output
+      failed_when: command_output.stderr != ""
+      changed_when: "'Error' not in command_output.stdout_lines"
+      ansible.builtin.command: "{{ swarm_manager_cmd }}"
+
+    - name: Join Swarm Workers
+      when: "'workers' in group_names"
+      register: command_output
+      failed_when: command_output.stderr != ""
+      changed_when: "'Error' not in command_output.stdout_lines"
+      ansible.builtin.command: "{{ swarm_worker_cmd }}"

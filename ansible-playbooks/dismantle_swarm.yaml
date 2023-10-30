@@ -1,0 +1,21 @@
+---
+- name: Dismantle Swarm
+  hosts: all
+  remote_user: ubuntu
+
+  tasks:
+    - name: Leave Swarm Managers
+      ignore_errors: true
+      when: "'managers' in group_names"
+      register: command_output
+      failed_when: command_output.stderr != ""
+      changed_when: "'Error' not in command_output.stdout_lines"
+      ansible.builtin.command: "docker swarm leave --force"
+
+    - name: Leave Swarm Workers
+      ignore_errors: true
+      when: "'workers' in group_names"
+      register: command_output
+      failed_when: command_output.stderr != ""
+      changed_when: "'Error' not in command_output.stdout_lines"
+      ansible.builtin.command: "docker swarm leave"

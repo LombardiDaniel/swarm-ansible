@@ -125,12 +125,12 @@ Traefik will take a few moments to generate the TLS certificates but after that,
 
 Portainer: `portainer.cloud.example.com`
 
-Remember that in the case of portainer, you have a limited ammount of time to accessit and create the admin user.
+Remember that in the case of portainer, you have a limited ammount of time to access it and create the admin user, if you don't, you'll need to restart the container service (on a manager node: `docker service update portainer_portainer`).
 
 #### 🗒️ NOTEs:
 
 - traefik http_pass config is: `admin:adminPass`, to change it, take a look at [traefik/create_pass.sh](traefik/create_pass.sh) and [traefik/docker-compose.yaml](traefik/docker-compose.yaml).
-- the portainer version we are running is the Community Edition (CE), you can run the Enterprise Edition (EE) for [free for up to 3-nodes](https://www.portainer.io/take-3) it gives some pretty cool functionality to automatically update services automatically with github actions for example, access to the private registry and more.
+- the portainer version we are running is the Community Edition (CE), you can run the Enterprise Edition (EE) for [free for up to 3-nodes](https://www.portainer.io/take-3) it gives some pretty cool functionality to update services automatically with github actions (simple POST request) for example, access to the private registry and more.
 
 ### 👟 Running your own services
 

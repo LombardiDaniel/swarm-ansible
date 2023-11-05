@@ -1,0 +1,86 @@
+version: "3.3"
+
+services:
+  swarmpit:
+    image: swarmpit/swarmpit:latest
+    environment:
+      - SWARMPIT_DB=http://db:5984
+      - SWARMPIT_INFLUXDB=http://influxdb:8086
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+      - traefik-public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.swarmpit.rule=Host(`swarmpit.${DOMAIN_NAME}`)"
+        - "traefik.http.services.swarmpit.loadbalancer.server.port=8080"
+        - "traefik.http.routers.swarmpit.entrypoints=websecure"
+        - "traefik.http.routers.swarmpit.tls=true"
+        - "traefik.http.routers.swarmpit.tls.certresolver=leresolver"
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 512M
+      placement:
+        constraints:
+          - node.role == manager
+  db:
+    image: treehouses/couchdb:2.3.1
+    volumes:
+      - db-data:/opt/couchdb/data
+    networks:
+      - net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  influxdb:
+    image: influxdb:1.7
+    volumes:
+      - influx-data:/var/lib/influxdb
+    networks:
+      - net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  agent:
+    image: swarmpit/agent:latest
+    environment:
+      - DOCKER_API_VERSION=1.43
+      - HEALTH_CHECK_ENDPOINT=http://swarmpit:8080/version
+      - EVENT_ENDPOINT=http://swarmpit:8080/events
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - net
+    deploy:
+      mode: global
+      labels:
+        swarmpit.agent: "true"
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 32M
+
+networks:
+  net:
+    driver: overlay
+  traefik-public:
+    external: true
+
+volumes:
+  db-data:
+    driver: local
+  influx-data:
+    driver: local

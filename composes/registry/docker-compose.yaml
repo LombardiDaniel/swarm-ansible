@@ -1,0 +1,61 @@
+version: "3"
+
+services:
+  registry:
+    image: registry:latest
+    networks:
+      - traefik-public
+    environment:
+      VIRTUAL_HOST: registry.${DOMAIN_NAME}
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/registry.password
+      # for ui
+      REGISTRY_HTTP_HEADERS_Access-Control-Origin: "[https://registry.${DOMAIN_NAME},http://registry.${DOMAIN_NAME},registry,registry:5000,https://registry-ui.${DOMAIN_NAME}/]"
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: "[HEAD,GET,OPTIONS,DELETE]"
+      REGISTRY_HTTP_HEADERS_Access-Control-Credentials: "[true]"
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: "[Authorization,Accept,Cache-Control]"
+      REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: "[Docker-Content-Digest]"
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      DELETE_IMAGES: "true"
+    volumes:
+      - /mnt/auth:/auth
+      - /mnt/registry:/var/lib/registry
+    deploy:
+      mode: replicated
+      placement:
+        constraints: [node.role == manager, node.hostname == node-0]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.registry.rule=Host(`registry.${DOMAIN_NAME}`)"
+        - "traefik.http.services.registry.loadbalancer.server.port=5000"
+        - "traefik.http.routers.registry.entrypoints=websecure"
+        - "traefik.http.routers.registry.tls=true"
+        - "traefik.http.routers.registry.tls.certresolver=leresolver"
+
+  frontend:
+    image: joxit/docker-registry-ui:latest
+    environment:
+      NGINX_PROXY_PASS_URL: http://registry:5000
+      REGISTRY_TITLE: BananaByte Private Docker Registry
+      SHOW_CATALOG_NB_TAGS: 1
+      SINGLE_REGISTRY: 1
+      DELETE_IMAGES: 1
+    networks:
+      - traefik-public
+    deploy:
+      mode: replicated
+      placement:
+        constraints: ["node.role == manager", "node.hostname == ${HOSTNAME}"]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.registry-ui.rule=Host(`registry-ui.${DOMAIN_NAME}`)"
+        - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
+        - "traefik.http.routers.registry-ui.entrypoints=websecure"
+        - "traefik.http.routers.registry-ui.tls=true"
+        - "traefik.http.routers.registry-ui.tls.certresolver=leresolver"
+
+networks:
+  traefik-public:
+    driver: overlay
+    external: true

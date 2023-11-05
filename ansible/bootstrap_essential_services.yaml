@@ -1,0 +1,67 @@
+---
+- name: Bootstrap Essentials
+  hosts: node0
+  remote_user: ubuntu
+  vars:
+    domain_name: "cloud.example.com"
+    maintainer_email: "my.email@email.com"
+    registry_password: "adminPass"
+
+    local_repo_dir: "{{ playbook_dir }}/.."
+    composes_dir: "{{ ansible_env.HOME }}/composes"
+
+  tasks:
+    - name: Copy compose files
+      ansible.builtin.copy:
+        src: "{{ local_repo_dir }}/composes/"
+        dest: "{{ composes_dir }}/"
+        mode: "0655"
+
+    - name: Create traefik overlay net
+      ignore_errors: true
+      failed_when: cmd_stdout.stderr != ""
+      changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      register: cmd_stdout
+      ansible.builtin.shell: |
+        docker network create --driver overlay --attachable traefik-public
+
+    - name: Start traefik stack
+      failed_when: cmd_stdout.stderr != ""
+      changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      register: cmd_stdout
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/traefik &&
+        docker stack deploy -c docker-compose.yaml traefik
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        MAINTAINER_EMAIL: "{{ maintainer_email }}"
+
+    - name: Start portainer stack
+      failed_when: cmd_stdout.stderr != ""
+      changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/portainer &&
+        docker stack deploy -c docker-compose.yaml portainer
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        HOSTNAME: "{{ ansible_hostname }}"
+
+    - name: Start registry stack
+      failed_when: cmd_stdout.stderr != ""
+      changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/registry &&
+        docker stack deploy -c docker-compose.yaml registry
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        HOSTNAME: "{{ ansible_hostname }}"
+        REGISTRY_PASSWD: "{{ registry_password }}"
+
+    - name: Start swarmpit stack
+      failed_when: cmd_stdout.stderr != ""
+      changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/swarmpit &&
+        docker stack deploy -c docker-compose.yaml swarmpit
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"

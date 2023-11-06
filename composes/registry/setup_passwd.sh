@@ -10,8 +10,8 @@ else
   registry_password=$1
 fi
 
-sudo mkdir /mnt
-sudo mkdir /mnt/auth
-sudo echo $(htpasswd -nb admin ${registry_password}) > /mnt/auth/registry.password
+sudo mkdir -p /mnt
+sudo mkdir -p /mnt/auth
+sudo echo $(htpasswd -nbB admin ${registry_password}) > /mnt/auth/registry.password
 
-sudo mkdir /mnt/registry
+sudo mkdir -p /mnt/registry

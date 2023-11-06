@@ -24,7 +24,7 @@ services:
     deploy:
       mode: replicated
       placement:
-        constraints: [node.role == manager, node.hostname == node-0]
+        constraints: ["node.role == manager", "node.hostname == ${HOSTNAME}"]
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.registry.rule=Host(`registry.${DOMAIN_NAME}`)"
@@ -45,15 +45,15 @@ services:
       - traefik-public
     deploy:
       mode: replicated
-      placement:
-        constraints: ["node.role == manager", "node.hostname == ${HOSTNAME}"]
+      # placement:
+      #   constraints: ["node.role == manager", "node.hostname == ${HOSTNAME}"]
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.registry-ui.rule=Host(`registry-ui.${DOMAIN_NAME}`)"
-        - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
-        - "traefik.http.routers.registry-ui.entrypoints=websecure"
-        - "traefik.http.routers.registry-ui.tls=true"
-        - "traefik.http.routers.registry-ui.tls.certresolver=leresolver"
+        - "traefik.http.routers.frontend.rule=Host(`registry-ui.${DOMAIN_NAME}`)"
+        - "traefik.http.services.frontend.loadbalancer.server.port=80"
+        - "traefik.http.routers.frontend.entrypoints=websecure"
+        - "traefik.http.routers.frontend.tls=true"
+        - "traefik.http.routers.frontend.tls.certresolver=leresolver"
 
 networks:
   traefik-public:

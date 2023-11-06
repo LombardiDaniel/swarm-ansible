@@ -5,7 +5,7 @@
   vars:
     domain_name: "cloud.example.com"
     maintainer_email: "my.email@email.com"
-    registry_password: "adminPass"
+    registry_password: "adminPasswd"
 
     local_repo_dir: "{{ playbook_dir }}/.."
     composes_dir: "{{ ansible_env.HOME }}/composes"
@@ -53,6 +53,7 @@
       register: cmd_stdout
       ansible.builtin.shell: |
         cd {{ composes_dir }}/registry &&
+        sudo ./setup_passwd.sh $REGISTRY_PASSWD &&
         docker stack deploy -c docker-compose.yaml registry
       environment:
         DOMAIN_NAME: "{{ domain_name }}"

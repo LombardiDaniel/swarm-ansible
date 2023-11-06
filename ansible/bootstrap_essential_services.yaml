@@ -39,6 +39,7 @@
     - name: Start portainer stack
       failed_when: cmd_stdout.stderr != ""
       changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      register: cmd_stdout
       ansible.builtin.shell: |
         cd {{ composes_dir }}/portainer &&
         docker stack deploy -c docker-compose.yaml portainer
@@ -49,6 +50,7 @@
     - name: Start registry stack
       failed_when: cmd_stdout.stderr != ""
       changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      register: cmd_stdout
       ansible.builtin.shell: |
         cd {{ composes_dir }}/registry &&
         docker stack deploy -c docker-compose.yaml registry
@@ -60,6 +62,7 @@
     - name: Start swarmpit stack
       failed_when: cmd_stdout.stderr != ""
       changed_when: "'Error' not in cmd_stdout.stdout_lines"
+      register: cmd_stdout
       ansible.builtin.shell: |
         cd {{ composes_dir }}/swarmpit &&
         docker stack deploy -c docker-compose.yaml swarmpit

@@ -37,7 +37,7 @@ services:
     image: joxit/docker-registry-ui:latest
     environment:
       NGINX_PROXY_PASS_URL: http://registry:5000
-      REGISTRY_TITLE: BananaByte Private Docker Registry
+      REGISTRY_TITLE: "${DOMAIN_NAME} Private Docker Registry"
       SHOW_CATALOG_NB_TAGS: 1
       SINGLE_REGISTRY: 1
       DELETE_IMAGES: 1

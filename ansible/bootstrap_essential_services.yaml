@@ -18,17 +18,16 @@
         mode: "0655"
 
     - name: Create traefik overlay net
-      ignore_errors: true
-      failed_when: cmd_stdout.stderr != ""
-      changed_when: "'Error' not in cmd_stdout.stdout_lines"
-      register: cmd_stdout
+      failed_when: cmd_out.stderr != "" and "already exists" not in cmd_out.stderr
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
       ansible.builtin.shell: |
         docker network create --driver overlay --attachable traefik-public
 
     - name: Start traefik stack
-      failed_when: cmd_stdout.stderr != ""
-      changed_when: "'Error' not in cmd_stdout.stdout_lines"
-      register: cmd_stdout
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/traefik &&
         docker stack deploy -c docker-compose.yaml traefik
@@ -37,9 +36,9 @@
         MAINTAINER_EMAIL: "{{ maintainer_email }}"
 
     - name: Start portainer stack
-      failed_when: cmd_stdout.stderr != ""
-      changed_when: "'Error' not in cmd_stdout.stdout_lines"
-      register: cmd_stdout
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/portainer &&
         docker stack deploy -c docker-compose.yaml portainer
@@ -48,9 +47,9 @@
         HOSTNAME: "{{ ansible_hostname }}"
 
     - name: Start registry stack
-      failed_when: cmd_stdout.stderr != ""
-      changed_when: "'Error' not in cmd_stdout.stdout_lines"
-      register: cmd_stdout
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/registry &&
         sudo ./setup_passwd.sh $REGISTRY_PASSWD &&
@@ -61,9 +60,9 @@
         REGISTRY_PASSWD: "{{ registry_password }}"
 
     - name: Start swarmpit stack
-      failed_when: cmd_stdout.stderr != ""
-      changed_when: "'Error' not in cmd_stdout.stdout_lines"
-      register: cmd_stdout
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/swarmpit &&
         docker stack deploy -c docker-compose.yaml swarmpit

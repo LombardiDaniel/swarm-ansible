@@ -99,7 +99,7 @@ If you also want to already bootstrap some base services, you can use this secti
 
 - [Traefik](https://doc.traefik.io/traefik/) - reverse proxy to access the cluster services
 - [Portainer](https://www.portainer.io/) - container orchestration web UI
-- [Registry](https://hub.docker.com/_/registry) - container (private) registry for your docker images
+- [Registry](https://hub.docker.com/_/registry) - container (private) registry for your docker images - Note that we are going to be using simple HttpAuth, check [this](https://medium.com/@maanadev/authorization-for-private-docker-registry-d1f6bf74552f) for other options
 - [Swarmpit](https://swarmpit.io/) - **Simple** hardware monitoring solution used for the cluster (also does simpler container orchestration and is mobile friendly!)
 
 To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, g to [bootstrap_essential_service.yaml](ansible/bootstrap_essential_services.yaml) and check the `vars` section:

@@ -17,6 +17,8 @@
       register: stdout
       changed_when: stdout | regex_search('successfully')
       ansible.legacy.command: "/setup_oracle_vm.sh"
+      environment:
+        REMOTE_USER: "{{ ansible_user }}"
 
     - name: Copy firewall script to server
       ansible.builtin.copy:

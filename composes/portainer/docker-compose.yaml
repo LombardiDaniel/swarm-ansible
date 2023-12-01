@@ -19,6 +19,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
+    environment:
+      TZ: America/Sao_Paulo
     networks:
       - traefik-public
       - agent_network

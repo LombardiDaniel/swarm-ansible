@@ -6,6 +6,7 @@ services:
     networks:
       - traefik-public
     environment:
+      TZ: America/Sao_Paulo
       VIRTUAL_HOST: registry.${DOMAIN_NAME}
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm

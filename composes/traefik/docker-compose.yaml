@@ -3,6 +3,8 @@ version: "3.3"
 services:
   traefik:
     image: "traefik:v2.1.4"
+    environment:
+      TZ: America/Sao_Paulo
     command:
       - --log.level=INFO
       - --entrypoints.web.address=:80
@@ -43,13 +45,10 @@ services:
         - "traefik.http.routers.traefik.entrypoints=websecure"
         # Change the auth password here
         - "traefik.http.routers.traefik.middlewares=authtraefik"
-        - "traefik.http.middlewares.authtraefik.basicauth.users=admin:$$apr1$$UqJ8XxeP$$OvZyl1j9dsvhF.NbfjaVx/" # user:password  # admin:adminPass
-
-        # global redirect to https
+        - "traefik.http.middlewares.authtraefik.basicauth.users=${USER_PASSWD_HASH_FOR_COMPOSE}" # user:password  # admin:adminPass        # global redirect to https
         - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
         - "traefik.http.routers.http-catchall.entrypoints=web"
         - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
-
         # middleware redirect
         - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 

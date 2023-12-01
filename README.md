@@ -112,7 +112,7 @@ To bootstrap these services, we'll need to do a tiny bit more configuring. To us
   vars:
     domain_name: "cloud.example.com" # <- your domain
     maintainer_email: "my.email@email.com" # <- your email
-    registry_password: "adminPass" # <- registry http password
+    basic_auth_password: "adminPass" # <- registry and traefik http password
 ```
 
 After configuring it, simply run:

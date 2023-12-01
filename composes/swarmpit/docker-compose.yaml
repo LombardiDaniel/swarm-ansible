@@ -4,8 +4,9 @@ services:
   swarmpit:
     image: swarmpit/swarmpit:latest
     environment:
-      - SWARMPIT_DB=http://db:5984
-      - SWARMPIT_INFLUXDB=http://influxdb:8086
+      SWARMPIT_DB: http://db:5984
+      SWARMPIT_INFLUXDB: http://influxdb:8086
+      TZ: America/Sao_Paulo
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:

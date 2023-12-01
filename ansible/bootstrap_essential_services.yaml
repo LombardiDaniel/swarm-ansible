@@ -5,7 +5,7 @@
   vars:
     domain_name: "cloud.example.com"
     maintainer_email: "my.email@email.com"
-    registry_password: "adminPasswd"
+    basic_auth_password: "adminPasswd"
 
     local_repo_dir: "{{ playbook_dir }}/.."
     composes_dir: "{{ ansible_env.HOME }}/composes"
@@ -29,7 +29,9 @@
       changed_when: "'Error' not in cmd_out.stdout_lines"
       register: cmd_out
       ansible.builtin.shell: |
+        ansible.builtin.shell: |
         cd {{ composes_dir }}/traefik &&
+        export USER_PASSWD_HASH_FOR_COMPOSE=$(./create_pass.sh {{ basic_auth_password }}) &&
         docker stack deploy -c docker-compose.yaml traefik
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
@@ -57,7 +59,7 @@
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         HOSTNAME: "{{ ansible_hostname }}"
-        REGISTRY_PASSWD: "{{ registry_password }}"
+        REGISTRY_PASSWD: "{{ basic_auth_password }}"
 
     - name: Start swarmpit stack
       failed_when: cmd_out.stderr != ""

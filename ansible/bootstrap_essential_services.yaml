@@ -18,11 +18,11 @@
         mode: "0755"
 
     - name: Create traefik overlay net
-    failed_when: cmd_out.stderr != "" and "already exists" not in cmd_out.stderr
-    changed_when: "'Error' not in cmd_out.stdout_lines"
-    register: cmd_out
-    ansible.builtin.shell: |
-    docker network create --driver overlay --attachable traefik-public
+      failed_when: cmd_out.stderr != "" and "already exists" not in cmd_out.stderr
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        docker network create --driver overlay --attachable traefik-public
 
     - name: Start traefik stack
       failed_when: cmd_out.stderr != ""
@@ -37,35 +37,35 @@
         MAINTAINER_EMAIL: "{{ maintainer_email }}"
 
     - name: Start portainer stack
-    failed_when: cmd_out.stderr != ""
-    changed_when: "'Error' not in cmd_out.stdout_lines"
-    register: cmd_out
-    ansible.builtin.shell: |
-    cd {{ composes_dir }}/portainer &&
-    docker stack deploy -c docker-compose.yaml portainer
-    environment:
-    DOMAIN_NAME: "{{ domain_name }}"
-    HOSTNAME: "{{ ansible_hostname }}"
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/portainer &&
+        docker stack deploy -c docker-compose.yaml portainer
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        HOSTNAME: "{{ ansible_hostname }}"
 
     - name: Start registry stack
-    failed_when: cmd_out.stderr != ""
-    changed_when: "'Error' not in cmd_out.stdout_lines"
-    register: cmd_out
-    ansible.builtin.shell: |
-    cd {{ composes_dir }}/registry &&
-    sudo ./setup_passwd.sh $REGISTRY_PASSWD &&
-    docker stack deploy -c docker-compose.yaml registry
-    environment:
-    DOMAIN_NAME: "{{ domain_name }}"
-    HOSTNAME: "{{ ansible_hostname }}"
-    REGISTRY_PASSWD: "{{ basic_auth_password }}"
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/registry &&
+        sudo ./setup_passwd.sh $REGISTRY_PASSWD &&
+        docker stack deploy -c docker-compose.yaml registry
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        HOSTNAME: "{{ ansible_hostname }}"
+        REGISTRY_PASSWD: "{{ basic_auth_password }}"
 
     - name: Start swarmpit stack
-    failed_when: cmd_out.stderr != ""
-    changed_when: "'Error' not in cmd_out.stdout_lines"
-    register: cmd_out
-    ansible.builtin.shell: |
-    cd {{ composes_dir }}/swarmpit &&
-    docker stack deploy -c docker-compose.yaml swarmpit
-    environment:
-    DOMAIN_NAME: "{{ domain_name }}"
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/swarmpit &&
+        docker stack deploy -c docker-compose.yaml swarmpit
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"

@@ -12,4 +12,4 @@ fi
 
 # We need double "$" so that docker-compose escapes it correctly
 
-echo $(htpasswd -nb admin password) | sed -e s/\\$/\\$\\$/g
+echo $(htpasswd -nb admin $password) | sed -e s/\\$/\\$\\$/g

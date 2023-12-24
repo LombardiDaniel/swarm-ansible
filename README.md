@@ -56,7 +56,7 @@ The first thing we need to do after getting our hardware ready is create a [host
 1.2.3.6
 ```
 
-In this demo, we assume the default user is ubuntu. But that can be changed on the header of every file inside the [ansible](ansible/) directory.
+In this demo, we assume the default user is ubuntu. But that can be changed on the header of every file inside the [playbooks](playbooks/) directory.
 
 ```yaml
 ---
@@ -76,13 +76,13 @@ To setup the cluster and install dependencies:
 > NOTE: this command DISABLES iptables firewall, do NOT host services on bare-metal after this.
 
 ```sh
-ansible-playbook -i hosts/hosts.ini ansible/setup.yaml
+ansible-playbook -i hosts/hosts.ini playbooks/setup.yaml
 ```
 
 Then, to initiailze the cluster:
 
 ```sh
-ansible-playbook -i hosts/hosts.ini ansible/bootstrap_swarm.yaml
+ansible-playbook -i hosts/hosts.ini playbooks/bootstrap_swarm.yaml
 ```
 
 The script already takes care of the different swarm join tokens, so there is no need for extra configuration.
@@ -90,7 +90,7 @@ The script already takes care of the different swarm join tokens, so there is no
 If anything goes wrong or you just want to dismantle the swarm, simply run:
 
 ```sh
-ansible-playbook -i hosts/hosts.ini ansible/dismantle_swarm.yaml
+ansible-playbook -i hosts/hosts.ini playbooks/dismantle_swarm.yaml
 ```
 
 ## 🚚 Base Services

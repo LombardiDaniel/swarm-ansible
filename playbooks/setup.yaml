@@ -20,18 +20,24 @@
       environment:
         REMOTE_USER: "{{ ansible_user }}"
 
-    - name: Copy firewall script to server
-      ansible.builtin.copy:
-        src: "{{ local_repo_dir }}/scripts/disable_firewall.sh"
-        dest: "/"
-        mode: "0755"
+    - name: Stop & Disable iptables
+      ansible.builtin.systemd_service:
+        name: iptables
+        state: stopped
+        enabled: false
 
-    - name: Creates startup disable-firewall crontab
-      ansible.builtin.cron:
-        name: "disable firewall"
-        special_time: reboot
-        user: root
-        job: "/disable_firewall.sh"
+    # - name: Copy firewall script to server
+    #   ansible.builtin.copy:
+    #     src: "{{ local_repo_dir }}/scripts/disable_firewall.sh"
+    #     dest: "/"
+    #     mode: "0755"
+
+    # - name: Creates startup disable-firewall crontab
+    #   ansible.builtin.cron:
+    #     name: "disable firewall"
+    #     special_time: reboot
+    #     user: root
+    #     job: "/disable_firewall.sh"
 
     - name: Unconditionally reboot the machine with all defaults
       ansible.builtin.reboot:

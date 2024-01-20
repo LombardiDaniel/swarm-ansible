@@ -33,6 +33,7 @@ services:
         - "traefik.http.routers.portainer.entrypoints=websecure"
         - "traefik.http.routers.portainer.tls=true"
         - "traefik.http.routers.portainer.tls.certresolver=leresolver"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       mode: replicated
       placement:
         # constraints: [node.role == manager, node.hostname == node-0]

@@ -70,6 +70,7 @@ services:
         - "traefik.http.routers.whoami.entrypoints=websecure"
         - "traefik.http.routers.whoami.tls=true"
         - "traefik.http.routers.whoami.tls.certresolver=leresolver"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
 networks:
   traefik-public:

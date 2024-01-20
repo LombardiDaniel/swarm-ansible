@@ -33,6 +33,7 @@ services:
         - "traefik.http.routers.registry.entrypoints=websecure"
         - "traefik.http.routers.registry.tls=true"
         - "traefik.http.routers.registry.tls.certresolver=leresolver"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
   frontend:
     image: joxit/docker-registry-ui:latest
@@ -55,6 +56,7 @@ services:
         - "traefik.http.routers.frontend.entrypoints=websecure"
         - "traefik.http.routers.frontend.tls=true"
         - "traefik.http.routers.frontend.tls.certresolver=leresolver"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
 networks:
   traefik-public:

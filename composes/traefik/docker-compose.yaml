@@ -9,6 +9,8 @@ services:
       - --log.level=INFO
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --providers.docker
       - --providers.docker.exposedbydefault=false
       - --providers.docker.swarmmode=true

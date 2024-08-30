@@ -100,9 +100,10 @@ If you also want to already bootstrap some base services, you can use this secti
 - [Traefik](https://doc.traefik.io/traefik/) - reverse proxy to access the cluster services
 - [Portainer](https://www.portainer.io/) - container orchestration web UI
 - [Registry](https://hub.docker.com/_/registry) - container (private) registry for your docker images - Note that we are going to be using simple HttpAuth, check [this](https://medium.com/@maanadev/authorization-for-private-docker-registry-d1f6bf74552f) for other options
-- [Swarmpit](https://swarmpit.io/) - **Simple** hardware monitoring solution used for the cluster (also does simpler container orchestration and is mobile friendly!)
+- [SwarmCronjob](https://crazymax.dev/swarm-cronjob/) - **Simple** cronjob solution
+<!-- - [Swarmpit](https://swarmpit.io/) - **Simple** hardware monitoring solution used for the cluster (also does simpler container orchestration and is mobile friendly!) -->
 
-To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, g to [bootstrap_essential_service.yaml](ansible/bootstrap_essential_services.yaml) and check the `vars` section:
+To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [bootstrap_essential_services.yaml](playbooks/bootstrap_essential_services.yaml) and check the `vars` section:
 
 ```yaml
 ---
@@ -139,12 +140,14 @@ Since we have a small cluster with very limited resources, it is pretty importan
 ```yaml
 deploy:
   labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.${MY_SERVICE_NAME}.rule=Host(`${SUBDOMAIN_TO_REDIRECT}.${DOMAIN_NAME}`)"
-    - "traefik.http.services.${MY_SERVICE_NAME}.loadbalancer.server.port=${TARGET_PORT}"
-    - "traefik.http.routers.${MY_SERVICE_NAME}.entrypoints=websecure"
-    - "traefik.http.routers.${MY_SERVICE_NAME}.tls=true"
-    - "traefik.http.routers.${MY_SERVICE_NAME}.tls.certresolver=leresolver"
+    - traefik.enable=true
+    - traefik.http.services.${MY_SERVICE_NAME}.loadbalancer.server.port=${TARGET_PORT}
+    - traefik.http.routers.${MY_SERVICE_NAME}.rule=Host(`${SUBDOMAIN_TO_REDIRECT}.${DOMAIN_NAME}`)
+    - traefik.http.routers.${MY_SERVICE_NAME}.entrypoints=websecure
+    - traefik.http.routers.${MY_SERVICE_NAME}.tls=true
+    - traefik.http.routers.${MY_SERVICE_NAME}.tls.certresolver=leresolver
+    # - traefik.http.routers.${MY_SERVICE_NAME}.middlewares=admin-auth  # this line enables the admin-auth on the service
+    # - traefik.http.routers.${MY_SERVICE_NAME}.service=${MY_SERVICE_NAME} # only needed if going to use more than 1 route per service
 ```
 
 In this yaml snippet, we have 4 vars:

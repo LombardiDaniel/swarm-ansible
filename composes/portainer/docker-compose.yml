@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.7"
 
 services:
   agent:
@@ -26,14 +26,12 @@ services:
       - agent_network
     deploy:
       labels:
-        - "traefik.enable=true"
-        # change the host here
-        - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN_NAME}`)"
-        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-        - "traefik.http.routers.portainer.entrypoints=websecure"
-        - "traefik.http.routers.portainer.tls=true"
-        - "traefik.http.routers.portainer.tls.certresolver=leresolver"
-        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        - traefik.enable=true
+        - traefik.http.services.portainer.loadbalancer.server.port=9000
+        - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN_NAME}`)
+        - traefik.http.routers.portainer.entrypoints=websecure
+        - traefik.http.routers.portainer.tls=true
+        - traefik.http.routers.portainer.tls.certresolver=leresolver
       mode: replicated
       placement:
         # constraints: [node.role == manager, node.hostname == node-0]

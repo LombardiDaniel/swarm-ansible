@@ -10,6 +10,6 @@ else
   password=$1
 fi
 
-# We need double "$" so that docker-compose escapes it correctly
+hash=$(htpasswd -nBb admin $password | sed -e s/\\$/\\$\\$/g)
 
-echo $(htpasswd -nb admin $password) | sed -e s/\\$/\\$\\$/g
+awk -v hash="$hash" '{gsub("MATCH_FOR_AWK", hash)}1' docker-compose.template.yml > docker-compose.yml

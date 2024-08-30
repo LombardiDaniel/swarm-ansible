@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 
 services:
   registry:
@@ -27,13 +27,12 @@ services:
       placement:
         constraints: ["node.role == manager", "node.hostname == ${HOSTNAME}"]
       labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.registry.rule=Host(`registry.${DOMAIN_NAME}`)"
-        - "traefik.http.services.registry.loadbalancer.server.port=5000"
-        - "traefik.http.routers.registry.entrypoints=websecure"
-        - "traefik.http.routers.registry.tls=true"
-        - "traefik.http.routers.registry.tls.certresolver=leresolver"
-        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        - traefik.enable=true
+        - traefik.http.services.registry.loadbalancer.server.port=5000
+        - traefik.http.routers.registry.rule=Host(`registry.${DOMAIN_NAME}`)
+        - traefik.http.routers.registry.entrypoints=websecure
+        - traefik.http.routers.registry.tls=true
+        - traefik.http.routers.registry.tls.certresolver=leresolver
 
   frontend:
     image: joxit/docker-registry-ui:latest
@@ -47,17 +46,14 @@ services:
       - traefik-public
     deploy:
       mode: replicated
-      # placement:
-      #   constraints: ["node.role == manager", "node.hostname == ${HOSTNAME}"]
       labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.frontend.rule=Host(`registry-ui.${DOMAIN_NAME}`)"
-        - "traefik.http.services.frontend.loadbalancer.server.port=80"
-        - "traefik.http.routers.frontend.entrypoints=websecure"
-        - "traefik.http.routers.frontend.tls=true"
-        - "traefik.http.routers.frontend.tls.certresolver=leresolver"
-        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-
+        - traefik.enable=true
+        - traefik.http.services.registry-ui.loadbalancer.server.port=80
+        - traefik.http.routers.registry-ui.rule=Host(`registry-ui.${DOMAIN_NAME}`)
+        - traefik.http.routers.registry-ui.entrypoints=websecure
+        - traefik.http.routers.registry-ui.tls=true
+        - traefik.http.routers.registry-ui.tls.certresolver=leresolver
+        - traefik.http.routers.registry-ui.middlewares=admin-auth
 networks:
   traefik-public:
     driver: overlay

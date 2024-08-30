@@ -1,0 +1,72 @@
+# note: MATCH_FOR_AWK -> admin password hash: https://doc.traefik.io/traefik/middlewares/http/basicauth/
+# replace manually for normal use
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v3.1.2
+    environment:
+      TZ: America/Sao_Paulo
+    command:
+      - --log.level=INFO
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedbydefault=false
+      - --providers.swarm.network=traefik-public
+      - --api
+      - --certificatesresolvers.leresolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.leresolver.acme.email=${MAINTAINER_EMAIL}
+      - --certificatesresolvers.leresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.leresolver.acme.tlschallenge=true
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - traefik-public
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certificates:/letsencrypt
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role==manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)
+        - traefik.http.routers.traefik.service=api@internal
+        - traefik.http.services.traefik.loadbalancer.server.port=8080
+        - traefik.http.routers.traefik.tls.certresolver=leresolver
+        - traefik.http.routers.traefik.entrypoints=websecure
+        - traefik.http.middlewares.admin-auth.basicauth.users=MATCH_FOR_AWK
+        - traefik.http.routers.traefik.middlewares=admin-auth
+
+  whoami:
+    image: containous/whoami:v1.3.0
+    networks:
+      - traefik-public
+    command:
+      - --port=8082
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.whoami.loadbalancer.server.port=8082
+        - traefik.http.routers.whoami.rule=Host(`whoami.${DOMAIN_NAME}`)
+        - traefik.http.routers.whoami.entrypoints=websecure
+        - traefik.http.routers.whoami.tls=true
+        - traefik.http.routers.whoami.tls.certresolver=leresolver
+        # - traefik.http.routers.whoami.middlewares=admin-auth  # this line enables the admin-auth on the service
+
+networks:
+  traefik-public:
+    driver: overlay
+    external: true
+
+volumes:
+  traefik_certificates:
+# docker network create --driver overlay --attachable traefik-public

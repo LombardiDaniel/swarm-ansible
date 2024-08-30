@@ -4,11 +4,11 @@ services:
   swarm-cronjob:
     image: crazymax/swarm-cronjob
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - "TZ=America/Sao_Paulo"
-      - "LOG_LEVEL=info"
-      - "LOG_JSON=false"
+      TZ: America/Sao_Paulo
+      LOG_LEVEL: info
+      LOG_JSON: "false"
     deploy:
       placement:
         constraints:

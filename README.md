@@ -76,13 +76,13 @@ To setup the cluster and install dependencies:
 > NOTE: this command DISABLES iptables firewall, do NOT host services on bare-metal after this.
 
 ```sh
-ansible-playbook -i hosts/hosts.ini playbooks/setup.yaml
+ansible-playbook -i hosts/hosts.ini playbooks/setup.yml
 ```
 
 Then, to initiailze the cluster:
 
 ```sh
-ansible-playbook -i hosts/hosts.ini playbooks/bootstrap_swarm.yaml
+ansible-playbook -i hosts/hosts.ini playbooks/bootstrap_swarm.yml
 ```
 
 The script already takes care of the different swarm join tokens, so there is no need for extra configuration.
@@ -90,7 +90,7 @@ The script already takes care of the different swarm join tokens, so there is no
 If anything goes wrong or you just want to dismantle the swarm, simply run:
 
 ```sh
-ansible-playbook -i hosts/hosts.ini playbooks/dismantle_swarm.yaml
+ansible-playbook -i hosts/hosts.ini playbooks/dismantle_swarm.yml
 ```
 
 ## 🚚 Base Services
@@ -103,7 +103,7 @@ If you also want to already bootstrap some base services, you can use this secti
 - [SwarmCronjob](https://crazymax.dev/swarm-cronjob/) - **Simple** cronjob solution
 <!-- - [Swarmpit](https://swarmpit.io/) - **Simple** hardware monitoring solution used for the cluster (also does simpler container orchestration and is mobile friendly!) -->
 
-To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [bootstrap_essential_services.yaml](playbooks/bootstrap_essential_services.yaml) and check the `vars` section:
+To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [bootstrap_essential_services.yml](playbooks/bootstrap_essential_services.yml) and check the `vars` section:
 
 ```yaml
 ---
@@ -119,7 +119,7 @@ To bootstrap these services, we'll need to do a tiny bit more configuring. To us
 After configuring it, simply run:
 
 ```sh
-ansible-playbook -i hosts/hosts.ini ansible/bootstrap_essential_services.yaml
+ansible-playbook -i hosts/hosts.ini ansible/bootstrap_essential_services.yml
 ```
 
 Traefik will take a few moments to generate the TLS certificates but after that, you can access those services with their subdomain. For example:
@@ -130,7 +130,7 @@ Remember that in the case of portainer, you have a limited ammount of time to ac
 
 #### 🗒️ NOTEs:
 
-- traefik http_pass config is: `admin:adminPass`, to change it, take a look at [traefik/create_pass.sh](traefik/create_pass.sh) and [traefik/docker-compose.yaml](traefik/docker-compose.yaml).
+- traefik http_pass config is: `admin:adminPass`, to change it, take a look at [traefik/create_pass.sh](traefik/create_pass.sh) and [traefik/docker-compose.yml](traefik/docker-compose.yml).
 - the portainer version we are running is the Community Edition (CE), you can run the Enterprise Edition (EE) for [free for up to 3-nodes](https://www.portainer.io/take-3) it gives some pretty cool functionality to update services automatically with github actions (simple POST request) for example, access to the private registry and more.
 
 ### 👟 Running your own services

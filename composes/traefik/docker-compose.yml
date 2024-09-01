@@ -6,7 +6,7 @@ services:
     environment:
       TZ: America/Sao_Paulo
     command:
-      - --log.level=INFO
+      - --log.level=DEBUG
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
@@ -32,10 +32,10 @@ services:
       placement:
         constraints:
           - node.role==manager
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 50M
+      # resources:
+      #   limits:
+      #     cpus: "0.25"
+      #     memory: 50M
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)

@@ -6,7 +6,7 @@ sudo apt-get update -y
 sudo NEEDRESTART_MODE=a apt-get upgrade -y
 
 # Docker Swarm:
-sudo apt-get install vim cron apache2-utils -y
+sudo apt-get install vim cron apache2-utils rsync -y
 curl -fsSL https://get.docker.com | sh -
 
 # sudo apt install apt-transport-https ca-certificates curl software-properties-common -y

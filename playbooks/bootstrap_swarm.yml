@@ -1,7 +1,7 @@
 ---
 - name: Gather Swarm together
   hosts: all
-  remote_user: ubuntu
+  # remote_user: ubuntu
   vars:
     node0_ip: "{{ ansible_default_ipv4.address }}" # private-ip (VCN) (default)
     # node0_ip: "{{ groups['node0'] | join('') }}" # public-ip (public net)

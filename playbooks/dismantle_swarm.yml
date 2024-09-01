@@ -1,7 +1,7 @@
 ---
 - name: Dismantle Swarm
   hosts: all
-  remote_user: ubuntu
+  # remote_user: ubuntu
 
   tasks:
     - name: Leave Swarm Managers

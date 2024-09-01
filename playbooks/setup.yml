@@ -2,7 +2,7 @@
 - name: Setup Nodes
   hosts: all
   become: true
-  remote_user: ubuntu
+  # remote_user: ubuntu
   vars:
     local_repo_dir: "{{ playbook_dir }}/.."
 

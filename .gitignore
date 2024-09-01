@@ -1,2 +1,5 @@
 hosts.ini.private
+vars.yml.private
+
+*.private
 .vscode

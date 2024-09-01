@@ -1,11 +1,11 @@
 ---
 - name: Bootstrap Essentials
   hosts: node0
-  remote_user: ubuntu
+  # remote_user: ubuntu
   vars:
-    domain_name: "cloud.example.com"
-    maintainer_email: "my.email@email.com"
-    basic_auth_password: "adminPasswd"
+    # domain_name: "cloud.example.com"
+    # maintainer_email: "my.email@email.com"
+    # basic_auth_password: "adminPasswd"
 
     local_repo_dir: "{{ playbook_dir }}/.."
     composes_dir: "{{ ansible_env.HOME }}/composes"

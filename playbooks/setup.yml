@@ -7,42 +7,42 @@
     local_repo_dir: "{{ playbook_dir }}/.."
 
   tasks:
-    - name: Copy setup script to server
-      ansible.builtin.copy:
-        src: "{{ local_repo_dir }}/scripts/setup_oracle_vm.sh"
-        dest: "/"
-        mode: "0755"
-
-    - name: Setup
-      register: stdout
-      changed_when: stdout | regex_search('successfully')
-      ansible.legacy.command: "/setup_oracle_vm.sh"
+    - name: Install dependencies
+      ansible.builtin.package:
+        name:
+          - vim
+          - cron
+          - apache2-utils
+          - rsync
+        state: present
       environment:
         REMOTE_USER: "{{ ansible_user }}"
 
+    - name: Setup
+      register: output
+      changed_when: output.rc != 0
+      ansible.legacy.shell: |
+        curl -fsSL https://get.docker.com | sh - &&
+        sudo usermod -aG docker $USER &&
+        sudo usermod -aG docker $REMOTE_USER
+      environment:
+        REMOTE_USER: "{{ ansible_user }}"
+
+    - name: Check if iptables is installed # noqa: no-changed-when
+      ansible.builtin.command: systemctl status iptables
+      register: iptables_check
+      failed_when: false
+      become: true
+
     - name: Stop & Disable iptables
+      become: true
       ansible.builtin.systemd_service:
         name: iptables
         state: stopped
         enabled: false
-
-    # - name: Copy firewall script to server
-    #   ansible.builtin.copy:
-    #     src: "{{ local_repo_dir }}/scripts/disable_firewall.sh"
-    #     dest: "/"
-    #     mode: "0755"
-
-    # - name: Creates startup disable-firewall crontab
-    #   ansible.builtin.cron:
-    #     name: "disable firewall"
-    #     special_time: reboot
-    #     user: root
-    #     job: "/disable_firewall.sh"
+      when: iptables_check.rc == 0
+      environment:
+        REMOTE_USER: "{{ ansible_user }}"
 
     - name: Unconditionally reboot the machine with all defaults
       ansible.builtin.reboot:
-
-    # - name: Disable firewall
-    #   register: stdout
-    #   changed_when: stdout | regex_search('successfully')
-    #   ansible.legacy.command: "/disable_firewall.sh"

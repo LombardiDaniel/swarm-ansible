@@ -1,0 +1,84 @@
+version: "3.7"
+
+services:
+  my-app:
+    image: registry.example.com/my-app:prod
+    networks:
+      - traefik-public
+      - my-app-net
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.my-app.service=my-app # only needed if we are going to declare another one, needed for things such as minio (fronend and console)
+        - traefik.http.services.my-app.loadbalancer.server.port=8080
+        - traefik.http.routers.my-app.rule=Host(`my-app.example.com`)
+        - traefik.http.routers.my-app.entrypoints=websecure
+        - traefik.http.routers.my-app.tls=true
+        - traefik.http.routers.my-app.tls.certresolver=leresolver
+        # Here we declare a second router for "auth" in our app
+        - traefik.http.routers.my-app-auth.service=my-app-auth
+        - traefik.http.services.my-app-auth.loadbalancer.server.port=5555
+        - traefik.http.routers.my-app-auth.rule=Host(`my-app.example.com`) && Path(`/auth`)
+        - traefik.http.routers.my-app-auth.entrypoints=websecure
+        - traefik.http.routers.my-app-auth.tls=true
+        - traefik.http.routers.my-app-auth.tls.certresolver=leresolver
+      mode: replicated
+      replicas: 3 # having more than one allows for rolling updates
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 500M
+    environment:
+      TZ: America/Sao_Paulo
+      DATABASE_URL: mysql+pymysql://mariadb:mariadb@db/mariadb
+      REDIS_URL: redis://cache:6379
+
+  db:
+    image: mariadb:10.4.12
+    volumes:
+      - mysql_data:/var/lib/mysql
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - node.hostname == node0 # this is important to fix the volume
+    networks:
+      - my-app-net
+
+  cache:
+    image: redis:4
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - node.hostname == node0 # this is important to fix the volume
+    volumes:
+      - redis_data:/data
+    networks:
+      - my-app-net
+
+  proxy-service:
+    image: nginx:alpine
+    networks:
+      - traefik-public
+    configs:
+      - source: nginxProxyConf
+        target: /etc/nginx/conf.d/default.conf
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.proxy-service.loadbalancer.server.port=80
+      - traefik.http.routers.proxy-service.rule=Host(`proxy.example.com`)
+      - traefik.http.routers.proxy-service.entrypoints=websecure
+      - traefik.http.routers.proxy-service.tls=true
+      - traefik.http.routers.proxy-service.tls.certresolver=leresolver
+
+networks:
+  traefik-public:
+    external: true
+    driver: overlay
+  my-app-net:
+    driver: overlay
+
+volumes:
+  mysql_data:
+  redis_data:

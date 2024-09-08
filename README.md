@@ -4,14 +4,14 @@ Build a Docker Swarm cluster using Ansible with swarm. The goal is to rapidly bo
 
 #### 🚨 Disclaimer:
 
-This repo aims to be a **simple** bootstrap of a docker swarm cluster using default configs, **especially** for the services in available [composes](composes/). If you would like more configuration options (considering for security), please read their respective documentations and configure them manually.
+This repo aims to be a **simple** (however somewhat production-ready) bootstrap of a docker swarm cluster using default configs, **especially** for the services in available [/composes](/composes/). If you would like more configuration options (considering for security), please read their respective documentations and configure them manually. I advise to NOT run any databases on this setup. Hosting of databases are complicated, it is better to just pay a service to do that for us, or use free-tier (there are many).
 
 ---
 
 ## ✅ System Requirements
 
 - Control Node (the machine you will be running the Ansible commands). I am using Ansible 2.15.1.
-- All swarm nodes (manager and workers) should have passwordless SSH access, this can be setup by passing your SSH public keys in the Oracle Compute Instance configuration. You can also check this [Digital Ocean Guide](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server) to set up ssh key based authentication on linux machines.
+- All swarm nodes (manager and workers) should have passwordless SSH access, this can be setup by passing your SSH public keys when you create your VM. You can also check this [Digital Ocean Guide](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server) to set up ssh key based authentication on linux machines.
 
 ## 🚀 Getting Started
 
@@ -27,13 +27,13 @@ For this demo, we are using 3 machines (all of them free):
 
 This gives us a total of 8-threads and 26GB of RAM for free!
 
-Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Thus, we can talk about fault tolerance. To keep high availability, we will have all 3 nodes as managers. For this, we can add the public-ip of all of them to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm).
+Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm).
 
 > You should maintain an odd number of managers in the swarm to support manager node failures. Having an odd number of managers ensures that during a network partition, there is a higher chance that the quorum remains available to process requests if the network is partitioned into two sets. Keeping the quorum is not guaranteed if you encounter more than two network partitions. https://docs.docker.com/engine/swarm/admin_guide/#add-manager-nodes-for-fault-tolerance
 
 Our architecture will look something like this (if you decide to bootstrap included services):
-![traefik_arch](static/traefik.png)
-The DNS will point to our manager nodes (in this case, all of them) and traefik will be exposed on all on port 80 (HTTP) and 443 (HTTPS).
+![architecture](/arch.png)
+The DNS will point to our manager nodes (in this case, just the left one) and traefik will be exposed on port 80 (HTTP) and 443 (HTTPS), we also set up redirection of port 80 -> 443 via traefik. Note that the `my-app` instance access the database without being exposed directly to the web, the "my-app-net" is a docker network with the `overlay` driver, this means that it exists on all nodes, allowing for inter-node comunication.
 
 ### 🍴Preparation
 
@@ -119,8 +119,8 @@ Remember that in the case of portainer, you have a limited ammount of time to ac
 
 #### 🗒️ NOTEs:
 
-- traefik http_pass config is: `admin:adminPass`, to change it, take a look at [composes/traefik/replace_pass.sh](composes/traefik/replace_pass.sh).
-- the portainer version we are running is the Community Edition (CE), you can run the Enterprise Edition (EE) for [free for up to 3-nodes](https://www.portainer.io/take-3) it gives some pretty cool functionality to update services automatically with github actions (simple POST request) for example, access to the private registry and more.
+- traefik http_pass config is: `admin:adminPass`, to change it, take a look at [/composes/traefik/replace_pass.sh](/composes/traefik/replace_pass.sh).
+- the portainer version we are running is the Community Edition (CE), you can run the Enterprise Edition (EE) for [free for up to 3-nodes](https://www.portainer.io/take-3) it gives some pretty cool functionality, check it out.
 
 ### 👟 Running your own services
 
@@ -140,6 +140,7 @@ services:
           cpus: "0.50"
           memory: 50M
       replicas: 3
+      mode: replicated # or "global" -> on all nodes
       labels:
         - shepherd.autodeploy=true # this will make shepherd watch for updates (on image tagged with "my-app:prod")
         - traefik.enable=true
@@ -148,8 +149,8 @@ services:
         - traefik.http.routers.${MY_SERVICE_NAME}.entrypoints=websecure
         - traefik.http.routers.${MY_SERVICE_NAME}.tls=true
         - traefik.http.routers.${MY_SERVICE_NAME}.tls.certresolver=leresolver
-        # - traefik.http.routers.${MY_SERVICE_NAME}.middlewares=admin-auth  # this line enables the admin-auth on the service
         # - traefik.http.routers.${MY_SERVICE_NAME}.service=${MY_SERVICE_NAME} # only needed if going to use more than 1 route (port) per service
+        # - traefik.http.routers.${MY_SERVICE_NAME}.middlewares=admin-auth  # this line enables the admin-auth on the service
 
 networks:
   traefik-public:
@@ -163,6 +164,21 @@ In this yaml snippet, we have 4 vars:
 - SUBDOMAIN_TO_REDIRECT: The subdomain used to redirect to that service
 - DOMAIN_NAME: Your domain name (can be used in conjunction with the subdomain to redirect from a whole new domain)
 - TARGET_PORT: The port where the service is running in it's container
+
+After this, check:
+
+- [https://portinaer.example.com](https://portinaer.example.com)
+- [https://registry.example.com](https://registry.example.com)
+- [https://registry-ui.example.com](https://registry-ui.example.com)
+- [https://traefik.example.com](https://traefik.example.com)
+
+The user is `admin` and the password is the one you previously configured.
+
+Take a look at [/example](/examples/) to see examples of:
+
+- Stateful apps running in the cluster (take a note at the placement constraints in the compose).
+- A reverse proxy (L7) configuration; for L4, you'll have to run an NGINX (or your LB of preference) and map the ports `host:container` and route them manually.
+- Example github actions workflow CI (with multi-arch, needed for heterogeneous clouds) file that ends up triggering the shepherd daemon to do the CD locally in the cluster. The image tags to push on that workflow are: `repository-name:branch-name`.
 
 ### 🍪 Thanks
 

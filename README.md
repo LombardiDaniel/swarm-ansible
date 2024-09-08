@@ -133,8 +133,13 @@ services:
   my-app:
     image: my-app:prod
     networks:
-      - traefik-public
+      - traefik-public # this allows the container to be accessed by traefik
     deploy:
+      resouces:
+        limits:
+          cpus: "0.50"
+          memory: 50M
+      replicas: 3
       labels:
         - shepherd.autodeploy=true # this will make shepherd watch for updates (on image tagged with "my-app:prod")
         - traefik.enable=true
@@ -145,6 +150,11 @@ services:
         - traefik.http.routers.${MY_SERVICE_NAME}.tls.certresolver=leresolver
         # - traefik.http.routers.${MY_SERVICE_NAME}.middlewares=admin-auth  # this line enables the admin-auth on the service
         # - traefik.http.routers.${MY_SERVICE_NAME}.service=${MY_SERVICE_NAME} # only needed if going to use more than 1 route (port) per service
+
+networks:
+  traefik-public:
+    driver: overlay
+    external: true
 ```
 
 In this yaml snippet, we have 4 vars:

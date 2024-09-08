@@ -92,15 +92,18 @@ If you also want to already bootstrap some base services, you can use this secti
 - [Portainer](https://www.portainer.io/) - container orchestration web UI
 - [Registry](https://hub.docker.com/_/registry) - container (private) registry for your docker images - Note that we are going to be using simple HttpAuth, check [this](https://medium.com/@maanadev/authorization-for-private-docker-registry-d1f6bf74552f) for other options
 - [SwarmCronjob](https://crazymax.dev/swarm-cronjob/) - **Simple** cronjob solution
+- [Shepherd](https://github.com/containrrr/shepherd/) - Update your services on image update
 <!-- - [Swarmpit](https://swarmpit.io/) - **Simple** hardware monitoring solution used for the cluster (also does simpler container orchestration and is mobile friendly!) -->
 
-To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](vars.yml) and check the `vars` section:
+To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](vars.yml):
 
 ```yaml
-domain_name: "cloud.example.com" # <- your domain
-maintainer_email: "my.email@email.com" # <- your email
-basic_auth_password: "adminPass" # <- registry and traefik http password
+domain_name: cloud.example.com # <- your domain
+maintainer_email: my.email@email.com # <- your email
+basic_auth_password: adminPass # <- registry and traefik http password (user is admin)
 ```
+
+Since we uploaded our own private container registry, we can deploy our services with a simple CD/CI build suck as [GitHub Actions](https://docs.github.com/en/actions), just build and push to your registry, it will be available at [https://registry.YOUR_DOMAIN_NAME/](https://registry.YOUR_DOMAIN_NAME/), then Shepherd will update it automatically. You can also check the registry UI at [https://registry-ui.YOUR_DOMAIN_NAME/](https://registry-ui.YOUR_DOMAIN_NAME/).
 
 After configuring it, simply run:
 
@@ -121,24 +124,32 @@ Remember that in the case of portainer, you have a limited ammount of time to ac
 
 ### 👟 Running your own services
 
-Since we have a small cluster with very limited resources, it is pretty important to set resource limits in the compose files. To create the routes in traefik, you must add these labels to the `deploy` segment in the compose file:
+Since we have a small cluster with very limited resources, it is pretty important to set resource limits in the compose files. To create the routes in traefik, you must add these labels to the `deploy` segment in the compose file. Take a look at the following example:
 
 ```yaml
-deploy:
-  labels:
-    - traefik.enable=true
-    - traefik.http.services.${MY_SERVICE_NAME}.loadbalancer.server.port=${TARGET_PORT}
-    - traefik.http.routers.${MY_SERVICE_NAME}.rule=Host(`${SUBDOMAIN_TO_REDIRECT}.${DOMAIN_NAME}`)
-    - traefik.http.routers.${MY_SERVICE_NAME}.entrypoints=websecure
-    - traefik.http.routers.${MY_SERVICE_NAME}.tls=true
-    - traefik.http.routers.${MY_SERVICE_NAME}.tls.certresolver=leresolver
-    # - traefik.http.routers.${MY_SERVICE_NAME}.middlewares=admin-auth  # this line enables the admin-auth on the service
-    # - traefik.http.routers.${MY_SERVICE_NAME}.service=${MY_SERVICE_NAME} # only needed if going to use more than 1 route per service
+version: "3.7"
+
+services:
+  my-app:
+    image: my-app:prod
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - shepherd.autodeploy=true # this will make shepherd watch for updates (on image tagged with "my-app:prod")
+        - traefik.enable=true
+        - traefik.http.services.${MY_SERVICE_NAME}.loadbalancer.server.port=${TARGET_PORT}
+        - traefik.http.routers.${MY_SERVICE_NAME}.rule=Host(`${SUBDOMAIN_TO_REDIRECT}.${DOMAIN_NAME}`)
+        - traefik.http.routers.${MY_SERVICE_NAME}.entrypoints=websecure
+        - traefik.http.routers.${MY_SERVICE_NAME}.tls=true
+        - traefik.http.routers.${MY_SERVICE_NAME}.tls.certresolver=leresolver
+        # - traefik.http.routers.${MY_SERVICE_NAME}.middlewares=admin-auth  # this line enables the admin-auth on the service
+        # - traefik.http.routers.${MY_SERVICE_NAME}.service=${MY_SERVICE_NAME} # only needed if going to use more than 1 route (port) per service
 ```
 
 In this yaml snippet, we have 4 vars:
 
-- MY_SERVICE_NAME: The name of the service in the compose file (i.e. "app")
+- MY_SERVICE_NAME: The name of the service in the compose file (i.e. "my-app", the name defined in the compose)
 - SUBDOMAIN_TO_REDIRECT: The subdomain used to redirect to that service
 - DOMAIN_NAME: Your domain name (can be used in conjunction with the subdomain to redirect from a whole new domain)
 - TARGET_PORT: The port where the service is running in it's container

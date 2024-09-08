@@ -60,16 +60,6 @@
         HOSTNAME: "{{ ansible_hostname }}"
         REGISTRY_PASSWD: "{{ basic_auth_password }}"
 
-    # - name: Start swarmpit stack
-    #   failed_when: cmd_out.stderr != ""
-    #   changed_when: "'Error' not in cmd_out.stdout_lines"
-    #   register: cmd_out
-    #   ansible.builtin.shell: |
-    #     cd {{ composes_dir }}/swarmpit &&
-    #     docker stack deploy -c docker-compose.yml --detach swarmpit
-    #   environment:
-    #     DOMAIN_NAME: "{{ domain_name }}"
-
     - name: Start swarm-cronjob stack
       failed_when: cmd_out.stderr != ""
       changed_when: "'Error' not in cmd_out.stdout_lines"
@@ -77,5 +67,15 @@
       ansible.builtin.shell: |
         cd {{ composes_dir }}/swarm-cronjob &&
         docker stack deploy -c docker-compose.yml --detach swarm-cronjob
-      environment:
-        DOMAIN_NAME: "{{ domain_name }}"
+      # environment:
+      #   DOMAIN_NAME: "{{ domain_name }}"
+
+    - name: Start shepherd stack
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        cd {{ composes_dir }}/shepherd &&
+        docker stack deploy -c docker-compose.yml --detach shepherd
+      # environment:
+      #   DOMAIN_NAME: "{{ domain_name }}"

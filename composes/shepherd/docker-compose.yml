@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  shepherd:
+    image: containrrr/shepherd:latest
+    environment:
+      SLEEP_TIME: 1m
+      TZ: America/Sao_Paulo
+      VERBOSE: "true"
+      IGNORELIST_SERVICES: label=shepherd.autodeploy=false
+      FILTER_SERVICES: label=shepherd.autodeploy=true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  # EXAMPLE: Explicitly enable shepherd for this service
+  # updating-app:
+  #   image: hello-world
+  #   deploy:
+  #     labels:
+  #       - shepherd.autodeploy=true
+
+  # EXAMPLE: Explicitly disable shepherd for this service
+  # not-updating-app:
+  #   image: hello-world
+  #   deploy:
+  #     labels:
+  #       - shepherd.autodeploy=false

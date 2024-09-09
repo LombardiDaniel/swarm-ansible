@@ -4,11 +4,11 @@ Build a Docker Swarm cluster using Ansible with swarm. The goal is to rapidly bo
 
 #### 🚨 Disclaimer:
 
-This repo aims to be a **simple** (however somewhat production-ready) bootstrap of a docker swarm cluster using default configs, **especially** for the services in available [/composes](/composes/). If you would like more configuration options (considering for security), please read their respective documentations and configure them manually. I advise to NOT run any databases on this setup. Hosting of databases are complicated, it is better to just pay a service to do that for us, or use free-tier (there are many).
+This repo aims to be a **simple** (however somewhat production-ready) bootstrap of a docker swarm cluster using default configs, **especially** for the services in available [composes](/composes/). If you would like more configuration options (considering for security), please read their respective documentations and configure them manually. I advise to NOT run any databases on this setup. Hosting of databases are complicated, it is better to just pay a service to do that for us, or use free-tier (there are many).
 
 ---
 
-## ✅ System Requirements
+### ✅ System Requirements
 
 - Control Node (the machine you will be running the Ansible commands). I am using Ansible 2.15.1.
 - All swarm nodes (manager and workers) should have passwordless SSH access, this can be setup by passing your SSH public keys when you create your VM. You can also check this [Digital Ocean Guide](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server) to set up ssh key based authentication on linux machines.
@@ -58,7 +58,7 @@ The first thing we need to do after getting our hardware ready is create a [host
 1.2.3.6
 ```
 
-In this demo, we assume the default user is ubuntu. But that can be changed on the header of every file inside the [playbooks](playbooks/) directory. You can also change it by passing the `-u REMOTE_USER` flag in the ansible comands.
+You will have to change the remote user by passing the `-u REMOTE_USER` flag in the ansible comands.
 
 ## 🐳 Creating the Cluster
 
@@ -88,16 +88,15 @@ ansible-playbook -u REMOTE_USER -i hosts/hosts.ini playbooks/dismantle_swarm.yml
 
 ## 🚚 Base Services
 
-If you also want to already bootstrap some base services, you can use this section to do so. The services that will be installed here are:
+If you also want to bootstrap some base services, you can use this section to do so. The services that will be installed here are:
 
-- [Traefik](https://doc.traefik.io/traefik/) - reverse proxy to access the cluster services
-- [Portainer](https://www.portainer.io/) - container orchestration web UI
-- [Registry](https://hub.docker.com/_/registry) - container (private) registry for your docker images - Note that we are going to be using simple HttpAuth, check [this](https://medium.com/@maanadev/authorization-for-private-docker-registry-d1f6bf74552f) for other options
+- [Traefik](https://doc.traefik.io/traefik/) - Reverse Proxy and Load Balancer to access the cluster services
+- [Portainer](https://www.portainer.io/) - Container Orchestration web UI
+- [Registry](https://hub.docker.com/_/registry) - Container (private) Registry for your docker images - Note that we are going to be using simple HttpAuth, check [this](https://medium.com/@maanadev/authorization-for-private-docker-registry-d1f6bf74552f) for other options
 - [SwarmCronjob](https://crazymax.dev/swarm-cronjob/) - **Simple** cronjob solution
 - [Shepherd](https://github.com/containrrr/shepherd/) - Update your services on image update
-<!-- - [Swarmpit](https://swarmpit.io/) - **Simple** hardware monitoring solution used for the cluster (also does simpler container orchestration and is mobile friendly!) -->
 
-To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](vars.yml):
+To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](/vars.yml):
 
 ```yaml
 domain_name: cloud.example.com # <- your domain
@@ -105,23 +104,23 @@ maintainer_email: my.email@email.com # <- your email
 basic_auth_password: adminPass # <- registry and traefik http password (user is admin)
 ```
 
-Since we uploaded our own private container registry, we can deploy our services with a simple CD/CI build suck as [GitHub Actions](https://docs.github.com/en/actions), just build and push to your registry, it will be available at [https://registry.YOUR_DOMAIN_NAME/](https://registry.YOUR_DOMAIN_NAME/), then Shepherd will update it automatically. You can also check the registry UI at [https://registry-ui.YOUR_DOMAIN_NAME/](https://registry-ui.YOUR_DOMAIN_NAME/).
+Since we uploaded our own private container registry, we can deploy our services with a simple CI/CD build such as [GitHub Actions](https://docs.github.com/en/actions), just build and push to your registry, it will be available at [https://registry.YOUR_DOMAIN_NAME/](https://registry.YOUR_DOMAIN_NAME/), then Shepherd will update it automatically. You can also check the registry UI at [https://registry-ui.YOUR_DOMAIN_NAME/](https://registry-ui.YOUR_DOMAIN_NAME/).
 
 After configuring it, simply run:
 
 ```sh
-ansible-playbook -u REMOTE_USER -i hosts/hosts.ini -extra-vars @vars.yml ansible/bootstrap_essential_services.yml
+ansible-playbook -u REMOTE_USER -i hosts/hosts.ini --extra-vars @vars.yml ansible/bootstrap_essential_services.yml
 ```
 
 Traefik will take a few moments to generate the TLS certificates but after that, you can access those services with their subdomain. For example:
 
-Portainer: `portainer.cloud.example.com`
+Portainer: `https://portainer.example.com`
 
 Remember that in the case of portainer, you have a limited ammount of time to access it and create the admin user, if you don't, you'll need to restart the container service (on a manager node: `docker service update portainer_portainer`).
 
 #### 🗒️ NOTEs:
 
-- traefik http_pass config is: `admin:adminPass`, to change it, take a look at [/composes/traefik/replace_pass.sh](/composes/traefik/replace_pass.sh).
+- traefik http_pass config is: `admin:adminPass`, to change it, take a look at [composes/traefik/replace_pass.sh](/composes/traefik/replace_pass.sh).
 - the portainer version we are running is the Community Edition (CE), you can run the Enterprise Edition (EE) for [free for up to 3-nodes](https://www.portainer.io/take-3) it gives some pretty cool functionality, check it out.
 
 ### 👟 Running your own services
@@ -176,11 +175,11 @@ After this, check:
 
 The user is `admin` and the password is the one you previously configured.
 
-Take a look at [/example](/examples/) to see examples of:
+Take a look at [example](/examples/) to see examples of:
 
 - Stateful apps running in the cluster (take a note at the placement constraints in the compose).
-- A reverse proxy (L7) configuration; for L4, you'll have to run an NGINX (or your LB of preference) and map the ports `host:container` and route them manually.
-- Example github actions workflow CI (with multi-arch, needed for heterogeneous clouds) file that ends up triggering the shepherd daemon to do the CD locally in the cluster. The image tags to push on that workflow are: `repository-name:branch-name`.
+- A reverse proxy (L7) configuration; for L4, you'll have to run an NGINX (or your LB of preference) and map the ports `host:container`, routing them manually, just remember to configure the container to be restrained to a single (manager) node so there is no chance of it's IP changing.
+- Example GitHub Actions Workflow CI (with multi-arch, needed for heterogeneous clouds) file that ends up triggering the shepherd daemon to do the CD locally in the cluster. The image tags to push on that workflow are: `repository-name:branch-name`.
 
 ### 🍪 Thanks
 

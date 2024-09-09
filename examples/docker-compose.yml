@@ -8,6 +8,8 @@ services:
       - my-app-net
     deploy:
       labels:
+        - shepherd.autodeploy=true # shepherd label to activate autoupdates
+        # traefik routers
         - traefik.enable=true
         - traefik.http.routers.my-app.service=my-app # only needed if we are going to declare another one, needed for things such as minio (fronend and console)
         - traefik.http.services.my-app.loadbalancer.server.port=8080
@@ -15,7 +17,7 @@ services:
         - traefik.http.routers.my-app.entrypoints=websecure
         - traefik.http.routers.my-app.tls=true
         - traefik.http.routers.my-app.tls.certresolver=leresolver
-        # Here we declare a second router for "auth" in our app
+        # here we declare a second router for "auth" in our app
         - traefik.http.routers.my-app-auth.service=my-app-auth
         - traefik.http.services.my-app-auth.loadbalancer.server.port=5555
         - traefik.http.routers.my-app-auth.rule=Host(`my-app.example.com`) && Path(`/auth`)

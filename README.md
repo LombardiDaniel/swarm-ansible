@@ -32,7 +32,9 @@ Since docker swarm is a distributed container orchestration tool, we need `manag
 > You should maintain an odd number of managers in the swarm to support manager node failures. Having an odd number of managers ensures that during a network partition, there is a higher chance that the quorum remains available to process requests if the network is partitioned into two sets. Keeping the quorum is not guaranteed if you encounter more than two network partitions. https://docs.docker.com/engine/swarm/admin_guide/#add-manager-nodes-for-fault-tolerance
 
 Our architecture will look something like this (if you decide to bootstrap included services):
+
 ![architecture](/arch.png)
+
 The DNS will point to our manager nodes (in this case, just the left one) and traefik will be exposed on port 80 (HTTP) and 443 (HTTPS), we also set up redirection of port 80 -> 443 via traefik. Note that the `my-app` instance access the database without being exposed directly to the web, the "my-app-net" is a docker network with the `overlay` driver, this means that it exists on all nodes, allowing for inter-node comunication.
 
 ### 🍴Preparation

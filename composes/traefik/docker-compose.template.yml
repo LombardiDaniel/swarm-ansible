@@ -1,4 +1,6 @@
-# note: MATCH_FOR_AWK -> admin password hash: https://doc.traefik.io/traefik/middlewares/http/basicauth/
+# note:
+# this file is a template, the string "MATCH_FOR_AWK" is meant to be replaced before use
+# MATCH_FOR_AWK -> admin password hash: https://doc.traefik.io/traefik/middlewares/http/basicauth/
 # replace manually for normal use
 version: "3.7"
 

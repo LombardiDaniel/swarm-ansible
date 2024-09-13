@@ -96,7 +96,7 @@ If you also want to bootstrap some base services, you can use this section to do
 - [SwarmCronjob](https://crazymax.dev/swarm-cronjob/) - **Simple** cronjob solution
 - [Shepherd](https://github.com/containrrr/shepherd/) - Update your services on image update
 
-To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, well need a domain name, and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](/vars.yml):
+To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, we'll need a domain name (configure the DNS to point both `example.com` and `*.example.com` to the managers ip's), and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](/vars.yml):
 
 ```yaml
 domain_name: cloud.example.com # <- your domain
@@ -175,7 +175,7 @@ After this, check:
 
 The user is `admin` and the password is the one you previously configured.
 
-Take a look at [example](/examples/) to see examples of:
+Take a look at [examples](/examples/) to see examples of:
 
 - Stateful apps running in the cluster (take a note at the placement constraints in the compose).
 - A reverse proxy (L7) configuration; for L4, you'll have to run an NGINX (or your LB of preference) and map the ports `host:container`, routing them manually, just remember to configure the container to be restrained to a single (manager) node so there is no chance of it's IP changing.

@@ -77,5 +77,18 @@
       ansible.builtin.shell: |
         cd {{ composes_dir }}/shepherd &&
         docker stack deploy -c docker-compose.yml --detach shepherd
-      # environment:
-      #   DOMAIN_NAME: "{{ domain_name }}"
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        HOSTNAME: "{{ ansible_hostname }}"
+        REGISTRY_PASSWD: "{{ basic_auth_password }}"
+
+    - name: Registry login
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        docker login registry.$DOMAIN_NAME -u admin -p $REGISTRY_PASSWD
+      environment:
+        DOMAIN_NAME: "{{ domain_name }}"
+        HOSTNAME: "{{ ansible_hostname }}"
+        REGISTRY_PASSWD: "{{ basic_auth_password }}"

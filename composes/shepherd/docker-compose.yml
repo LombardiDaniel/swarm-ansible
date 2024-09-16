@@ -9,6 +9,10 @@ services:
       VERBOSE: "true"
       IGNORELIST_SERVICES: label=shepherd.autodeploy=false
       FILTER_SERVICES: label=shepherd.autodeploy=true
+      REGISTRY_HOST: registry.${DOMAIN_NAME}
+      REGISTRY_USER: admin
+      REGISTRY_PASSWORD: ${REGISTRY_PASSWD}
+
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     deploy:

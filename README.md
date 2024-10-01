@@ -95,6 +95,7 @@ If you also want to bootstrap some base services, you can use this section to do
 - [Registry](https://hub.docker.com/_/registry) - Container (private) Registry for your docker images - Note that we are going to be using simple HttpAuth, check [this](https://medium.com/@maanadev/authorization-for-private-docker-registry-d1f6bf74552f) for other options
 - [SwarmCronjob](https://crazymax.dev/swarm-cronjob/) - **Simple** cronjob solution
 - [Shepherd](https://github.com/containrrr/shepherd/) - Update your services on image update
+- [Dozzle](https://dozzle.dev/) - Simple logging and monitoring
 
 To bootstrap these services, we'll need to do a tiny bit more configuring. To use traefik, we'll need a domain name (configure the DNS to point both `example.com` and `*.example.com` to the managers ip's), and since in this example we use it to create SSL certificates, we need a maintainer email. To configure it, go to [vars.yml](/vars.yml):
 
@@ -172,6 +173,7 @@ After this, check:
 - [https://registry.example.com](https://registry.example.com)
 - [https://registry-ui.example.com](https://registry-ui.example.com)
 - [https://traefik.example.com](https://traefik.example.com)
+- [https://dozzle.example.com](https://dozzle.example.com)
 
 The user is `admin` and the password is the one you previously configured.
 

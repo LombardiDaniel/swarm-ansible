@@ -1,0 +1,26 @@
+version: "3.7"
+
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik-public
+    environment:
+      DOZZLE_MODE: swarm
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.dozzle.loadbalancer.server.port=8080
+        - traefik.http.routers.dozzle.rule=Host(`dozzle.${DOMAIN_NAME}`)
+        - traefik.http.routers.dozzle.entrypoints=websecure
+        - traefik.http.routers.dozzle.tls=true
+        - traefik.http.routers.dozzle.tls.certresolver=leresolver
+        - traefik.http.routers.dozzle.middlewares=admin-auth
+      mode: global
+
+networks:
+  traefik-public:
+    driver: overlay
+    external: true

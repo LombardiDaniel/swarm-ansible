@@ -93,7 +93,7 @@
         DOMAIN_NAME: "{{ domain_name }}"
 
     - name: Registry login
-      failed_when: cmd_out.stderr != ""
+      failed_when: "'WARNING!' not in cmd_out.stderr"
       changed_when: "'Error' not in cmd_out.stdout_lines"
       register: cmd_out
       ansible.builtin.shell: |

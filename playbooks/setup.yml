@@ -15,6 +15,7 @@
           - apache2-utils
           - rsync
         state: present
+        update_cache: true
       environment:
         REMOTE_USER: "{{ ansible_user }}"
 

@@ -160,6 +160,10 @@ networks:
     external: true
 ```
 
+```sh
+docker stack deploy -c compose.yml MY_STACK_NAME --with-registry-auth
+```
+
 In this yaml snippet, we have 4 vars:
 
 - MY_SERVICE_NAME: The name of the service in the compose file (i.e. "my-app", the name defined in the compose)

@@ -13,7 +13,8 @@
       failed_when: cmd_stdout.stderr != ""
       changed_when: "'Error' not in cmd_stdout.stdout_lines"
       ansible.builtin.shell: |
-        docker swarm init --advertise-addr {{ node0_ip }}
+        # docker swarm init --advertise-addr {{ node0_ip }}
+        docker swarm init
 
     - name: Get swarm worker token # noqa: run-once
       run_once: true

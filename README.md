@@ -110,7 +110,7 @@ Since we uploaded our own private container registry, we can deploy our services
 After configuring it, simply run:
 
 ```sh
-ansible-playbook -u REMOTE_USER -i hosts/hosts.ini --extra-vars @vars.yml ansible/bootstrap_essential_services.yml
+ansible-playbook -u REMOTE_USER -i hosts/hosts.ini --extra-vars @vars.yml playbooks/bootstrap_essential_services.yml
 ```
 
 Traefik will take a few moments to generate the TLS certificates but after that, you can access those services with their subdomain. For example:

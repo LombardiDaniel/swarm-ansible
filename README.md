@@ -1,10 +1,12 @@
 # Automated Docker Swarm bootstrap using Ansible
 
+> Ei você! É BR? Dá uma olhada em [/infra](/infra/) onde já temos manifestos terraform pra maior e melhor [MagaluCloud](https://magalu.cloud/)! Com um comando, um cluster inteiro configurado!
+
 Build a Docker Swarm cluster using Ansible with swarm. The goal is to rapidly bootstrap a Docker Swarm cluster on machines running: Debian; Ubuntu.
 
 #### 🚨 Disclaimer:
 
-This repo aims to be a **simple** (however somewhat production-ready) bootstrap of a docker swarm cluster using default configs, **especially** for the services in available [composes](/composes/). If you would like more configuration options (considering for security), please read their respective documentations and configure them manually. I advise to NOT run any databases on this setup. Hosting of databases are complicated, it is better to just pay a service to do that for us, or use free-tier (there are many).
+This repo aims to be a **simple** (however somewhat production-ready) bootstrap of a docker swarm cluster using default configs, **especially** for the services in available [composes](/composes/). If you would like more configuration options (considering for security), please read their respective documentations and configure them manually. I advise to NOT run any databases on this setup. Hosting of databases is complicated, it is better to just pay a service to do that for us, or use a free-tier (there are many).
 
 ---
 
@@ -27,7 +29,7 @@ For this demo, we are using 3 machines (all of them free):
 
 This gives us a total of 8-threads and 26GB of RAM for free!
 
-Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm).
+Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip (for more advanced users; yes, you can use a bastion and keep the worker nodes unaccessible publicly) of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm). The needed ports for communication between the nodes are: `:2377`, `:7946` and `:4789`.
 
 > You should maintain an odd number of managers in the swarm to support manager node failures. Having an odd number of managers ensures that during a network partition, there is a higher chance that the quorum remains available to process requests if the network is partitioned into two sets. Keeping the quorum is not guaranteed if you encounter more than two network partitions. https://docs.docker.com/engine/swarm/admin_guide/#add-manager-nodes-for-fault-tolerance
 

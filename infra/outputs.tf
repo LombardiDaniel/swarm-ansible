@@ -31,7 +31,7 @@ ${mgc_virtual_machine_instances.manager_nodes_instances[0].network.public_addres
 ${i.network.public_address}
 %{endfor~}
 %{for i in mgc_virtual_machine_instances.worker_nodes_instances[*]~}
-${i.network.private_address} ansible_ssh_common_args="-o StrictHostKeyChecking=no -J ubuntu@${mgc_virtual_machine_instances.manager_nodes_instances[0].network.public_address}"
+${i.network.private_address} ansible_ssh_common_args="-J ubuntu@${mgc_virtual_machine_instances.manager_nodes_instances[0].network.public_address}"
 %{endfor~}
 
 [managers]
@@ -41,7 +41,7 @@ ${i.network.public_address}
 
 [workers]
 %{for i in mgc_virtual_machine_instances.worker_nodes_instances[*]~}
-${i.network.private_address} ansible_ssh_common_args="-o StrictHostKeyChecking=no -J ubuntu@${mgc_virtual_machine_instances.manager_nodes_instances[0].network.public_address}"
+${i.network.private_address} ansible_ssh_common_args="-J ubuntu@${mgc_virtual_machine_instances.manager_nodes_instances[0].network.public_address}"
 %{endfor~}
 
 EOT

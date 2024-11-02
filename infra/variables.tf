@@ -5,7 +5,7 @@ variable "project_name" {
 
 variable "ssh_key_name" {
   type    = string
-  default = "lombardi"
+  default = "my_ssh_key_name"
 }
 
 variable "machine_type" {

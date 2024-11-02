@@ -22,7 +22,7 @@ locals {
 resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
   provider = mgc.sudeste
   count    = local.cluster_majority
-  name     = "${var.project_name}-swarm-manger-node-${count.index}"
+  name     = "${var.project_name}-swarm-manger-${count.index}"
   machine_type = {
     name = var.machine_type
   }
@@ -50,7 +50,7 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
 resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
   provider = mgc.sudeste
   count    = local.cluster_minority
-  name     = "${var.project_name}-swarm-worker-node-${count.index}"
+  name     = "${var.project_name}-swarm-worker-${count.index}"
   machine_type = {
     name = var.machine_type
   }
@@ -90,12 +90,12 @@ resource "null_resource" "execute_ansible_on_local" {
 
   provisioner "local-exec" {
     command = <<-EOT
-    /bin/bash -c
-    "cd .. && \
-    ansible-playbook -u ubuntu -i hosts/hosts.ini.private playbooks/setup.yml && \
-    ansible-playbook -u ubuntu -i hosts/hosts.ini.private playbooks/bootstrap_swarm.yml && \
-    ansible-playbook -u ubuntu -i hosts/hosts.ini --extra-vars @vars.yml playbooks/bootstrap_essential_services.yml"
+    ansible-playbook -u ubuntu -i hosts/hosts.ini playbooks/setup.yml && 
+    ansible-playbook -u ubuntu -i hosts/hosts.ini playbooks/bootstrap_swarm.yml && 
+    ansible-playbook -u ubuntu -i hosts/hosts.ini --extra-vars @vars.yml playbooks/bootstrap_essential_services.yml
     EOT
+
+    working_dir = "../"
 
     environment = {
       ANSIBLE_HOST_KEY_CHECKING = "False"

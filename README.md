@@ -1,6 +1,6 @@
 # Automated Docker Swarm bootstrap using Ansible
 
-> Ei você! É BR? Dá uma olhada em [/infra](/infra/) onde já temos manifestos terraform pra maior e melhor [MagaluCloud](https://magalu.cloud/)! Com um comando, um cluster inteiro configurado!
+> Ei você! É BR? Dá uma olhada em [/infra](/infra/) onde já temos manifestos terraform pra maior e melhor [MagaluCloud](https://magalu.cloud/)! Com um comando, um cluster inteiro configurado (já rodamos os playbooks ansible junto com o terraform pra vc)!
 
 Build a Docker Swarm cluster using Ansible with swarm. The goal is to rapidly bootstrap a Docker Swarm cluster on machines running: Debian; Ubuntu.
 
@@ -13,23 +13,21 @@ This repo aims to be a **simple** (however somewhat production-ready) bootstrap 
 ### ✅ System Requirements
 
 - Control Node (the machine you will be running the Ansible commands). I am using Ansible 2.15.1.
+  - [Anisble](https://www.ansible.com/)
+  - [Terraform](https://www.terraform.io/)
 - All swarm nodes (manager and workers) should have passwordless SSH access, this can be setup by passing your SSH public keys when you create your VM. You can also check this [Digital Ocean Guide](https://www.digitalocean.com/community/tutorials/how-to-configure-ssh-key-based-authentication-on-a-linux-server) to set up ssh key based authentication on linux machines.
 
 ## 🚀 Getting Started
 
 ### 💻 Hardware we will use
 
-For this example, we will be using the [Oracle Cloud Allways-Free Tier](https://www.oracle.com/cloud/free/). We can instantiate one machine per Fault Domain, ensuring our VMs are not all on the same physical hardware.
+For this example, we will be using [MagaluCloud](https://magalu.cloud/), but it also works with seamlessly with [Oracle Cloud Allways-Free Tier](https://www.oracle.com/cloud/free/).
 
-For this demo, we are using 3 machines (all of them free):
+For this demo, we are using 3 machines:
 
-- Ampere aarch64 Altra 4-core CPU w/ 24GB RAM
-- AMD x86_64 EPYC 1-core CPU w/ 1GB RAM
-- AMD x86_64 EPYC 1-core CPU w/ 1GB RAM
+- 3x BV4-8-100: 4vCPU 8GB of RAM and 100GB disk space
 
-This gives us a total of 8-threads and 26GB of RAM for free!
-
-Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip (for more advanced users; yes, you can use a bastion and keep the worker nodes unaccessible publicly) of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm). The needed ports for communication between the nodes are: `:2377`, `:7946` and `:4789`.
+Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip (for more advanced users; yes, you can use a bastion and keep the worker nodes unaccessible publicly) of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm). The needed ports for communication between the nodes are: `:2377`, `:7946` and `:4789` (remember to allow traffic on these ports).
 
 > You should maintain an odd number of managers in the swarm to support manager node failures. Having an odd number of managers ensures that during a network partition, there is a higher chance that the quorum remains available to process requests if the network is partitioned into two sets. Keeping the quorum is not guaranteed if you encounter more than two network partitions. https://docs.docker.com/engine/swarm/admin_guide/#add-manager-nodes-for-fault-tolerance
 
@@ -37,7 +35,7 @@ Our architecture will look something like this (if you decide to bootstrap inclu
 
 ![architecture](/arch.png)
 
-The DNS will point to our manager nodes (in this case, just the left one) and traefik will be exposed on port 80 (HTTP) and 443 (HTTPS), we also set up redirection of port 80 -> 443 via traefik. Note that the `my-app` instance access the database without being exposed directly to the web, the "my-app-net" is a docker network with the `overlay` driver, this means that it exists on all nodes, allowing for inter-node comunication.
+The DNS will point to our manager nodes (in this case, `node-0` and `node-1`) and traefik will be exposed on port 80 (HTTP) and 443 (HTTPS), we also set up redirection of port 80 -> 443 via traefik. Note that the `my-app` instance access the database without being exposed directly to the web, the "my-app-net" is a docker network with the `overlay` driver, this means that it exists on all nodes, allowing for inter-node comunication.
 
 ### 🍴Preparation
 
@@ -186,7 +184,7 @@ The user is `admin` and the password is the one you previously configured.
 Take a look at [examples](/examples/) to see examples of:
 
 - Stateful apps running in the cluster (take a note at the placement constraints in the compose).
-- A reverse proxy (L7) configuration; for L4, you'll have to run an NGINX (or your LB of preference) and map the ports `host:container`, routing them manually, just remember to configure the container to be restrained to a single (manager) node so there is no chance of it's IP changing.
+- A reverse proxy (L7) configuration; for L4, you'll have to run an HAProxy (or your LB of preference) and map the ports `host:container`, routing them manually, just remember to configure the container to be restrained to a single (manager) node so there is no chance of it's IP changing.
 - Example GitHub Actions Workflow CI (with multi-arch, needed for heterogeneous clouds) file that ends up triggering the shepherd daemon to do the CD locally in the cluster. The image tags to push on that workflow are: `repository-name:branch-name`.
 
 ### 🍪 Thanks

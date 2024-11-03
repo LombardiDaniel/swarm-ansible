@@ -87,6 +87,7 @@ resource "null_resource" "execute_ansible_on_local" {
   depends_on = [
     time_sleep.wait_60_seconds
   ]
+  count = var.run_ansible ? 1 : 0
 
   provisioner "local-exec" {
     command = <<-EOT

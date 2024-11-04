@@ -27,7 +27,7 @@ For this demo, we are using 3 machines:
 
 - 3x BV4-8-100: 4vCPU 8GB of RAM and 100GB disk space
 
-Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip (for more advanced users; yes, you can use a bastion and keep the worker nodes unaccessible publicly) of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm). The needed ports for communication between the nodes are: `:2377`, `:7946` and `:4789` (remember to allow traffic on these ports).
+Since docker swarm is a distributed container orchestration tool, we need `manager` and `worker` nodes. Add the public-ip (for more advanced users; yes, you can use a bastion and keep the worker nodes unaccessible publicly) of all manager nodes (in our case, just the left one) to your DNS, as traefik (the reverse proxy we will be using must run on managers to retrieve info about the swarm). The needed ports for communication between the nodes are: `:2377` (TCP), `:7946` (TCP/UDP) and `:4789`(UDP), remember to allow traffic on these ports.
 
 > You should maintain an odd number of managers in the swarm to support manager node failures. Having an odd number of managers ensures that during a network partition, there is a higher chance that the quorum remains available to process requests if the network is partitioned into two sets. Keeping the quorum is not guaranteed if you encounter more than two network partitions. https://docs.docker.com/engine/swarm/admin_guide/#add-manager-nodes-for-fault-tolerance
 

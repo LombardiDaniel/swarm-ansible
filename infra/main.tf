@@ -7,6 +7,15 @@ terraform {
   }
 }
 
+module "network" {
+  source = "./modules/network"
+
+  project_name = var.project_name
+  allow_ssh = true
+  allowed_tcp_ports = [80, 443, 2377, 7946]
+  allowed_udp_ports = [4789]
+}
+
 provider "time" {}
 
 provider "mgc" {
@@ -30,9 +39,9 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
     name = "cloud-ubuntu-22.04 LTS"
   }
   network = {
-    # vpc = {
-    #   id = mgc_network_vpc.swarm_vpc.network_id
-    # }
+    vpc = {
+      id = module.network.swarm_network_id
+    }
     associate_public_ip = true
     delete_public_ip    = false
     interface = {
@@ -58,9 +67,9 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
     name = "cloud-ubuntu-22.04 LTS"
   }
   network = {
-    # vpc = {
-    #   id = mgc_network_vpc.swarm_vpc.network_id
-    # }
+    vpc = {
+      id = module.network.swarm_network_id
+    }
     associate_public_ip = false
     delete_public_ip    = false
     interface = {

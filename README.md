@@ -215,4 +215,5 @@ Take a look at [examples](/examples/) to see examples of:
 This repo was somewhat inspired by [tecno-tim's k3s-ansible](https://github.com/techno-tim/k3s-ansible). Check him out!
 
 - [k3s-io/k3s-ansible](https://github.com/k3s-io/k3s-ansible)
+- [Under the Hood with Docker Swarm Mode](https://www.youtube.com/watch?v=Mw4ImA2IB10)
 - Hat tip to everyone who's code was used!

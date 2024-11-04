@@ -141,6 +141,9 @@ services:
         limits:
           cpus: "0.50"
           memory: 50M
+      # placement:  # more details below
+      #   preferences:
+      #     - spread: node.labels.az
       replicas: 3
       mode: replicated # or "global" -> on all nodes
       labels:
@@ -180,6 +183,26 @@ After this, check:
 - [https://dozzle.example.com](https://dozzle.example.com)
 
 The user is `admin` and the password is the one you previously configured.
+
+### Other cool stuff you can do
+
+Docker Swarm also supports `node-labels`, so you can seperate availability zones (for example):
+
+```sh
+docker node update \
+  --label-add az=1 \
+  NODE_HOSTNAME_OR_ID
+```
+
+and use it with:
+
+```sh
+docker service create \
+  --placement-pref "spread=node.labels.az" \
+  my_service
+```
+
+This will make sure the service containers are distributed evenly on nodes with different `az` labels.
 
 Take a look at [examples](/examples/) to see examples of:
 

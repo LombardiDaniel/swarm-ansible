@@ -8,9 +8,9 @@ Caso queira experimentar a MagaluCloud, configure os arquivos da root da maneira
 
 Para começar, crie um grupo de segurança que expõe (TCP) as portas `:80`, `:443` e para o docker-swarm, as portas `:2377`, `:7946` e `:4789`. No momento isso precisa ser feito pelo console de fato (ainda não funciona pelo Terraform).
 
-> NOTE: A CLI parece não estar completamente funcional na parte de VPCs/SecurityGroups, então adicione as regras ao security group padrão. Isso pois precisamos do ID dos security groups para adicionar ao [variables.tf](/infra/variables.tf).
+> NOTE: A CLI parece não estar completamente funcional na parte de VPCs/SecurityGroups, então adicione as regras ao security group padrão. Isso pois precisamos do ID dos security groups para adicionar .tfvars.
 
-Após isso, cheque o [variables.tf](/infra/variables.tf) e complete-o com os dados. Lembre-se de se autenticar na [CLI da MagaluCloud](https://docs.magalu.cloud/docs/devops-tools/cli-mgc/how-to/download-and-install/):
+Após isso, cheque o [variables.tf](/infra/variables.tf) e complete o `.tfvars` com os dados. Lembre-se de se autenticar na [CLI da MagaluCloud](https://docs.magalu.cloud/docs/devops-tools/cli-mgc/how-to/download-and-install/):
 
 ```sh
 mgc auth login
@@ -20,7 +20,8 @@ Após isso, basta rodar:
 
 ```sh
 terraform init
-terraform apply
+terraform plan -var-file=".tfvars"
+terraform apply -var-file=".tfvars"
 ```
 
 e...pronto! O terrafom irá gerar o output com os IPs das máquinas, adicione os managers em seu DNS.

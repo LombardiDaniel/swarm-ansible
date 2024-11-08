@@ -16,3 +16,14 @@ variable "allowed_tcp_ports" {
   type    = list(number)
   default = []
 }
+
+variable "api_key" {
+  type        = string
+  description = "MGC_API_KEY"
+}
+
+variable "region" {
+  type        = string
+  default     = "sudeste"
+  description = "sudeste | nordeste"
+}

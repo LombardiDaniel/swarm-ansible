@@ -1,17 +1,17 @@
 variable "project_name" {
-  type    = string
-  default = "my_project_name"
+  type        = string
+  description = "project name, used on namng of resources"
 }
 
 variable "run_ansible" {
   description = "Runs Ansible Scripts after creating infra, may cause errors because DNS will not be available for LetsEncrypt"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "ssh_key_name" {
-  type    = string
-  default = "my_ssh_key_name" # ssh key name in mgc (check out the CLI)
+  type        = string
+  description = "SSH key name in MGC"
 }
 
 variable "machine_type" {
@@ -24,21 +24,18 @@ variable "cluster_size" {
   default = 3
 }
 
-variable "manager_sec_group_ids" {
-  type = list(string)
-  default = [
-    " 2de3d4e1-2f92-4321-9ee7-c6c49d0faef8"
-  ]
-}
-
-variable "worker_sec_group_ids" {
-  type = list(string)
-  default = [
-    " 2de3d4e1-2f92-4321-9ee7-c6c49d0faef8" # can be the same as the manager sec group
-  ]
-}
-
 variable "hosts_ini_path" {
   type    = string
   default = "../hosts/hosts.ini"
+}
+
+variable "api_key" {
+  type        = string
+  description = "MGC_API_KEY"
+}
+
+variable "region" {
+  type        = string
+  default     = "sudeste"
+  description = "sudeste | nordeste"
 }

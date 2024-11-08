@@ -2,7 +2,7 @@ terraform {
   required_providers {
     mgc = {
       source  = "magalucloud/mgc"
-      version = "0.27.1"
+      version = "0.29.2"
     }
   }
 }
@@ -10,17 +10,12 @@ terraform {
 module "network" {
   source = "./modules/network"
 
-  project_name = var.project_name
-  allow_ssh = true
+  api_key           = var.api_key
+  region            = var.region
+  project_name      = var.project_name
+  allow_ssh         = true
   allowed_tcp_ports = [80, 443, 2377, 7946]
   allowed_udp_ports = [4789]
-}
-
-provider "time" {}
-
-provider "mgc" {
-  alias  = "sudeste"
-  region = "br-se1"
 }
 
 locals {
@@ -29,9 +24,9 @@ locals {
 }
 
 resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
-  provider = mgc.sudeste
-  count    = local.cluster_majority
-  name     = "${var.project_name}-swarm-manger-${count.index}"
+  # provider = mgc.sudeste
+  count = local.cluster_majority
+  name  = "${var.project_name}-swarm-manager-${count.index}"
   machine_type = {
     name = var.machine_type
   }
@@ -40,15 +35,14 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
   }
   network = {
     vpc = {
-      id = module.network.swarm_network_id
+      id = module.network.vpc_id
     }
     associate_public_ip = true
     delete_public_ip    = false
     interface = {
       security_groups = [
-        for id in var.manager_sec_group_ids : {
-          id = id
-        }
+        { id = module.network.ssh_sec_group_id },
+        { id = module.network.swarm_managers_sec_group_id },
       ]
     }
   }
@@ -68,15 +62,14 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
   }
   network = {
     vpc = {
-      id = module.network.swarm_network_id
+      id = module.network.vpc_id
     }
     associate_public_ip = false
     delete_public_ip    = false
     interface = {
       security_groups = [
-        for id in var.worker_sec_group_ids : {
-          id = id
-        }
+        { id = module.network.ssh_sec_group_id },
+        { id = module.network.swarm_workers_sec_group_id },
       ]
     }
   }

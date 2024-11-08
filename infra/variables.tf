@@ -34,8 +34,3 @@ variable "api_key" {
   description = "MGC_API_KEY"
 }
 
-variable "region" {
-  type        = string
-  default     = "sudeste"
-  description = "sudeste | nordeste"
-}

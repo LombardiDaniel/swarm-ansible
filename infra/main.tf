@@ -11,9 +11,7 @@ module "network" {
   source = "./modules/network"
 
   api_key           = var.api_key
-  region            = var.region
   project_name      = var.project_name
-  allow_ssh         = true
   allowed_tcp_ports = [80, 443, 2377, 7946]
   allowed_udp_ports = [4789]
 }
@@ -24,7 +22,6 @@ locals {
 }
 
 resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
-  # provider = mgc.sudeste
   count = local.cluster_majority
   name  = "${var.project_name}-swarm-manager-${count.index}"
   machine_type = {
@@ -78,6 +75,7 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
 }
 
 resource "time_sleep" "wait_60_seconds" {
+  count = var.run_ansible ? 1 : 0
   depends_on = [
     mgc_virtual_machine_instances.manager_nodes_instances,
     mgc_virtual_machine_instances.worker_nodes_instances,

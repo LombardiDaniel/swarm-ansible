@@ -1,6 +1,6 @@
 variable "project_name" {
   type        = string
-  description = "project name, used on namng of resources"
+  description = "project name, used on naming of resources"
 }
 
 variable "run_ansible" {

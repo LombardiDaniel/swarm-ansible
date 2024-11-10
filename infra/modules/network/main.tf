@@ -8,8 +8,8 @@ terraform {
 }
 
 resource "mgc_network_vpcs" "swarm_vpc" {
-  name        = "${var.project_name}-swarm-vpc"
-  description = "${var.project_name}-swarm-vpc"
+  name = "${var.project_name}-swarm-vpc"
+  # description = "${var.project_name}-swarm-vpc"
 }
 
 resource "mgc_network_security_groups" "swarm_managers_sec_group" {
@@ -25,7 +25,6 @@ resource "mgc_network_security_groups" "allow_ssh_sec_group" {
 }
 
 resource "mgc_network_security_groups_rules" "allow_ssh" {
-
   for_each          = { "IPv4" : "0.0.0.0/0", "IPv6" : "::/0" }
   direction         = "ingress"
   ethertype         = each.key

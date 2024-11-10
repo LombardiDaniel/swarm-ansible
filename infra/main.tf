@@ -31,9 +31,9 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
     name = "cloud-ubuntu-22.04 LTS"
   }
   network = {
-    vpc = {
-      id = module.network.vpc_id
-    }
+    # vpc = {
+    #   id = module.network.vpc_id
+    # }
     associate_public_ip = true
     delete_public_ip    = false
     interface = {
@@ -45,6 +45,7 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
   }
 
   ssh_key_name = var.ssh_key_name
+  depends_on   = [module.network]
 }
 
 resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
@@ -58,9 +59,9 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
     name = "cloud-ubuntu-22.04 LTS"
   }
   network = {
-    vpc = {
-      id = module.network.vpc_id
-    }
+    # vpc = {
+    #   id = module.network.vpc_id
+    # }
     associate_public_ip = false
     delete_public_ip    = false
     interface = {
@@ -72,6 +73,7 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
   }
 
   ssh_key_name = var.ssh_key_name
+  depends_on   = [module.network]
 }
 
 resource "time_sleep" "wait_60_seconds" {

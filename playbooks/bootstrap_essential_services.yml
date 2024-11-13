@@ -110,3 +110,11 @@
         DOMAIN_NAME: "{{ domain_name }}"
         HOSTNAME: "{{ ansible_hostname }}"
         REGISTRY_PASSWD: "{{ basic_auth_password }}"
+
+    - name: Delete composes from remote
+      when: "'node0' in group_names"
+      failed_when: cmd_out.stderr != ""
+      changed_when: "'Error' not in cmd_out.stdout_lines"
+      register: cmd_out
+      ansible.builtin.shell: |
+        rm -rf composes

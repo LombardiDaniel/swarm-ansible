@@ -2,7 +2,7 @@ terraform {
   required_providers {
     mgc = {
       source  = "magalucloud/mgc"
-      version = "0.29.2"
+      version = "0.30.0"
     }
   }
 }
@@ -12,6 +12,7 @@ module "network" {
 
   api_key           = var.api_key
   project_name      = var.project_name
+  vpc_id            = var.vpc_id
   allowed_tcp_ports = [80, 443, 2377, 7946]
   allowed_udp_ports = [4789]
 }
@@ -19,6 +20,11 @@ module "network" {
 locals {
   cluster_majority = floor(0.5 + (var.cluster_size + 1) / 2)
   cluster_minority = var.cluster_size - local.cluster_majority
+}
+
+resource "mgc_ssh_keys" "cluster_ssh_key" {
+  name = "${var.project_name}-ssh-key"
+  key  = var.ssh_pub_key
 }
 
 resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
@@ -31,9 +37,9 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
     name = "cloud-ubuntu-22.04 LTS"
   }
   network = {
-    # vpc = {
-    #   id = module.network.vpc_id
-    # }
+    vpc = {
+      id = module.network.vpc_id
+    }
     associate_public_ip = true
     delete_public_ip    = false
     interface = {
@@ -44,7 +50,7 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
     }
   }
 
-  ssh_key_name = var.ssh_key_name
+  ssh_key_name = mgc_ssh_keys.cluster_ssh_key.name
   depends_on   = [module.network]
 }
 
@@ -59,9 +65,9 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
     name = "cloud-ubuntu-22.04 LTS"
   }
   network = {
-    # vpc = {
-    #   id = module.network.vpc_id
-    # }
+    vpc = {
+      id = module.network.vpc_id
+    }
     associate_public_ip = false
     delete_public_ip    = false
     interface = {
@@ -72,7 +78,7 @@ resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
     }
   }
 
-  ssh_key_name = var.ssh_key_name
+  ssh_key_name = mgc_ssh_keys.cluster_ssh_key.name
   depends_on   = [module.network]
 }
 

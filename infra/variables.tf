@@ -9,9 +9,19 @@ variable "run_ansible" {
   default     = false
 }
 
-variable "ssh_key_name" {
+# variable "ssh_key_name" {
+#   type        = string
+#   description = "SSH key name in MGC"
+# }
+
+variable "vpc_id" {
   type        = string
-  description = "SSH key name in MGC"
+  description = "[OPTIONAL] VPC ID, if none is passed, will create a new one"
+  default     = ""
+}
+
+variable "ssh_pub_key" {
+  type = string
 }
 
 variable "machine_type" {

@@ -2,14 +2,14 @@ terraform {
   required_providers {
     mgc = {
       source  = "magalucloud/mgc"
-      version = "0.29.2"
+      version = "0.30.0"
     }
   }
 }
 
 resource "mgc_network_vpcs" "swarm_vpc" {
-  name = "${var.project_name}-swarm-vpc"
-  # description = "${var.project_name}-swarm-vpc"
+  count = var.vpc_id == "" ? 1 : 0
+  name  = "${var.project_name}-vpc"
 }
 
 resource "mgc_network_security_groups" "swarm_managers_sec_group" {

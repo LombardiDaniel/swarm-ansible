@@ -4,7 +4,7 @@ services:
   shepherd:
     image: containrrr/shepherd:latest
     environment:
-      SLEEP_TIME: 5s
+      SLEEP_TIME: 30s
       TZ: America/Sao_Paulo
       VERBOSE: "true"
       IGNORELIST_SERVICES: label=shepherd.autodeploy=false

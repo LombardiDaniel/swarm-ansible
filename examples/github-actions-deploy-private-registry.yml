@@ -43,3 +43,12 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_TAG }}
           platforms: linux/amd64,linux/arm64
+
+      # - name: SSH and update
+      #   uses: cssnr/stack-deploy-action@v1
+      #   with:
+      #     host: ${{ secrets.DOCKER_CLUSTER_HOST }}
+      #     user: ${{ secrets.DOCKER_CLUSTER_USER }}
+      #     ssh_key: ${{ secrets.DOCKER_CLUSTER_SSH_PRIVATE_KEY }}
+      #     file: "docker-compose.swarm.yml"
+      #     name: "${{ github.event.repository.name }}" # stack name is same as repo

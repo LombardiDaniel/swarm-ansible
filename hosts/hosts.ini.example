@@ -1,0 +1,12 @@
+[node0]  # The node you will use to run init the swarm (must be a manager)
+public_ip
+
+[all]  # all nodes ips
+public_ip
+priv_ip ansible_ssh_common_args="-J ubuntu@bastion_ip"  # this needs to be used for private ssh hosts that need a bastion
+
+[managers]  # manager nodes ips
+public_ip
+
+[workers]  # worker nodes ips
+priv_ip ansible_ssh_common_args="-J ubuntu@bastion_ip"  # this needs to be used for private ssh hosts that need a bastion

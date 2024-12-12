@@ -36,10 +36,13 @@ services:
       placement:
         constraints:
           - node.role==manager
-      # resources:
-      #   limits:
-      #     cpus: "0.5"
-      #     memory: 50M
+      resources:
+        reservations:
+          cpus: 30m
+          memory: 60M
+        limits:
+          cpus: 200m
+          memory: 200M
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)

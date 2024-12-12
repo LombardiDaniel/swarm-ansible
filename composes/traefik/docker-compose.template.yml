@@ -38,11 +38,11 @@ services:
           - node.role==manager
       resources:
         reservations:
-          cpus: 30m
-          memory: 60M
+          cpus: 100m
+          memory: 100M
         limits:
-          cpus: 200m
-          memory: 200M
+          cpus: 500m
+          memory: 500M
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)

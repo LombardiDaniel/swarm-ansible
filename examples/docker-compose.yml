@@ -74,6 +74,10 @@ services:
       - traefik.http.routers.proxy-service.tls=true
       - traefik.http.routers.proxy-service.tls.certresolver=leresolver
 
+configs:
+  nginxProxyConf:
+    external: true
+
 networks:
   traefik-public:
     external: true

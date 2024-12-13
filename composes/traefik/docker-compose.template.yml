@@ -38,10 +38,10 @@ services:
           - node.role==manager
       resources:
         reservations:
-          cpus: 100m
+          cpus: "0.1"
           memory: 100M
         limits:
-          cpus: 500m
+          cpus: "0.5"
           memory: 500M
       labels:
         - traefik.enable=true

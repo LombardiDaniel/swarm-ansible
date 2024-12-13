@@ -45,3 +45,5 @@ override.tf.json
 terraform.rc
 
 .env
+
+hosts.ini

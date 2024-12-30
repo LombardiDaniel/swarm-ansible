@@ -29,10 +29,11 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_TOKEN }}
 
-      - name: Generate tag name
-        shell: bash
-        run: |-
-          echo "IMAGE_TAG=${{ REGISTRY_URL }}/${{ github.event.repository.name }}:${GITHUB_REF##*/}" >> $GITHUB_ENV
+      - name: Generate random tag
+        id: generate_tag
+        run: |
+          echo "::set-output name=random_tag::random-${{ github.sha }}"
+          echo "::set-output name=branch_tag::${GITHUB_REF##*/}"
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -41,7 +42,9 @@ jobs:
           file: Dockerfile
           # target: server  # for multi-stage builds
           push: true
-          tags: ${{ env.IMAGE_TAG }}
+          # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest,${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.random_tag }}
+          tags: ${{ REGISTRY_URL }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.branch_tag }}
           platforms: linux/amd64,linux/arm64
 
       # - name: SSH and update

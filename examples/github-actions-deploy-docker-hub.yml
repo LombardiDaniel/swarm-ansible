@@ -20,6 +20,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Generate random tag
+        id: generate_tag
+        run: |
+          echo "::set-output name=random_tag::random-${{ github.sha }}"
+          echo "::set-output name=branch_tag::${GITHUB_REF##*/}"
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:

@@ -41,7 +41,7 @@ resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
       id = module.network.vpc_id
     }
     associate_public_ip = true
-    delete_public_ip    = false
+    delete_public_ip    = true
     interface = {
       security_groups = [
         { id = module.network.ssh_sec_group_id },

@@ -3,13 +3,15 @@ variable "project_name" {
 }
 
 variable "allowed_udp_ports" {
-  type    = list(number)
-  default = []
+  type        = list(number)
+  default     = []
+  description = "on managers"
 }
 
 variable "allowed_tcp_ports" {
-  type    = list(number)
-  default = []
+  type        = list(number)
+  default     = []
+  description = "on managers"
 }
 
 variable "api_key" {
@@ -19,6 +21,6 @@ variable "api_key" {
 
 variable "vpc_id" {
   type        = string
-  description = "[OPTIONAL] VPC ID, if none is passed, will create a new one"
   default     = ""
+  description = "[OPTIONAL] VPC ID, if none is passed, will create a new one"
 }

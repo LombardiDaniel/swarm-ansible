@@ -1,9 +1,8 @@
 terraform {
   required_providers {
     mgc = {
-      source = "magalucloud/mgc"
-      # version = "0.31.0"
-      version = "0.32.2"
+      source  = "magalucloud/mgc"
+      version = "0.33.0"
     }
   }
 }
@@ -51,25 +50,25 @@ resource "mgc_virtual_machine_instances" "worker_nodes_vms" {
 }
 
 resource "mgc_network_public_ips_attach" "pub_ip_attachs" {
-  for_each     = mgc_virtual_machine_instances.manager_nodes_vms
+  for_each     = { for idx, vm in mgc_virtual_machine_instances.manager_nodes_vms : tostring(idx) => vm }
   public_ip_id = mgc_network_public_ips.manager_pub_ips[each.key].id
-  interface_id = each.value.id
+  interface_id = each.value.network_interfaces[0].id
 }
 
 resource "mgc_network_security_groups_attach" "ssh_security_group_attach" {
-  for_each          = concat(mgc_virtual_machine_instances.manager_nodes_vms, mgc_virtual_machine_instances.worker_nodes_vms)
+  for_each          = { for idx, vm in concat(mgc_virtual_machine_instances.manager_nodes_vms, mgc_virtual_machine_instances.worker_nodes_vms) : tostring(idx) => vm }
   interface_id      = each.value.network_interfaces[0].id
   security_group_id = module.network.ssh_sec_group_id
 }
 
 resource "mgc_network_security_groups_attach" "managers_security_group_attach" {
-  for_each          = mgc_virtual_machine_instances.manager_nodes_vms
+  for_each          = { for idx, vm in mgc_virtual_machine_instances.manager_nodes_vms : tostring(idx) => vm }
   interface_id      = each.value.network_interfaces[0].id
   security_group_id = module.network.swarm_managers_sec_group_id
 }
 
 resource "mgc_network_security_groups_attach" "workers_security_group_attach" {
-  for_each          = mgc_virtual_machine_instances.worker_nodes_vms
+  for_each          = { for idx, vm in mgc_virtual_machine_instances.worker_nodes_vms : tostring(idx) => vm }
   interface_id      = each.value.network_interfaces[0].id
   security_group_id = module.network.swarm_managers_sec_group_id
 }

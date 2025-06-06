@@ -1,7 +1,7 @@
 provider "time" {}
 
 provider "mgc" {
-  alias   = "sudeste"
+  # alias   = "sudeste"
   region  = "br-se1"
   api_key = var.api_key
 }

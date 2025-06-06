@@ -2,7 +2,7 @@ terraform {
   required_providers {
     mgc = {
       source  = "magalucloud/mgc"
-      version = "0.31.0"
+      version = "0.33.0"
     }
   }
 }
@@ -27,66 +27,57 @@ resource "mgc_ssh_keys" "cluster_ssh_key" {
   key  = var.ssh_pub_key
 }
 
-resource "mgc_virtual_machine_instances" "manager_nodes_instances" {
-  count = local.cluster_majority
-  name  = "${var.project_name}-swarm-manager-${count.index}"
-  machine_type = {
-    name = var.machine_type
-  }
-  image = {
-    name = "cloud-ubuntu-22.04 LTS"
-  }
-  network = {
-    vpc = {
-      id = module.network.vpc_id
-    }
-    associate_public_ip = true
-    delete_public_ip    = true
-    interface = {
-      security_groups = [
-        { id = module.network.ssh_sec_group_id },
-        { id = module.network.swarm_managers_sec_group_id },
-      ]
-    }
-  }
-
-  ssh_key_name = mgc_ssh_keys.cluster_ssh_key.name
-  depends_on   = [module.network]
+resource "mgc_network_public_ips" "manager_pub_ips" {
+  count       = local.cluster_majority
+  description = "${var.project_name}-swarm-manager-${count.index}"
+  vpc_id      = var.vpc_id
 }
 
-resource "mgc_virtual_machine_instances" "worker_nodes_instances" {
-  provider = mgc.sudeste
-  count    = local.cluster_minority
-  name     = "${var.project_name}-swarm-worker-${count.index}"
-  machine_type = {
-    name = var.machine_type
-  }
-  image = {
-    name = "cloud-ubuntu-22.04 LTS"
-  }
-  network = {
-    vpc = {
-      id = module.network.vpc_id
-    }
-    associate_public_ip = false
-    delete_public_ip    = false
-    interface = {
-      security_groups = [
-        { id = module.network.ssh_sec_group_id },
-        { id = module.network.swarm_workers_sec_group_id },
-      ]
-    }
-  }
-
+resource "mgc_virtual_machine_instances" "manager_nodes_vms" {
+  count        = local.cluster_majority
+  name         = "${var.project_name}-swarm-manager-${count.index}"
+  machine_type = var.machine_type
+  image        = "cloud-ubuntu-22.04 LTS"
   ssh_key_name = mgc_ssh_keys.cluster_ssh_key.name
-  depends_on   = [module.network]
+}
+
+resource "mgc_virtual_machine_instances" "worker_nodes_vms" {
+  count        = local.cluster_minority
+  name         = "${var.project_name}-swarm-worker-${count.index}"
+  machine_type = var.machine_type
+  image        = "cloud-ubuntu-22.04 LTS"
+  ssh_key_name = mgc_ssh_keys.cluster_ssh_key.name
+}
+
+resource "mgc_network_public_ips_attach" "pub_ip_attachs" {
+  for_each     = { for idx, vm in mgc_virtual_machine_instances.manager_nodes_vms : tostring(idx) => vm }
+  public_ip_id = mgc_network_public_ips.manager_pub_ips[each.key].id
+  interface_id = each.value.network_interfaces[0].id
+}
+
+resource "mgc_network_security_groups_attach" "ssh_security_group_attach" {
+  for_each          = { for idx, vm in concat(mgc_virtual_machine_instances.manager_nodes_vms, mgc_virtual_machine_instances.worker_nodes_vms) : tostring(idx) => vm }
+  interface_id      = each.value.network_interfaces[0].id
+  security_group_id = module.network.ssh_sec_group_id
+}
+
+resource "mgc_network_security_groups_attach" "managers_security_group_attach" {
+  for_each          = { for idx, vm in mgc_virtual_machine_instances.manager_nodes_vms : tostring(idx) => vm }
+  interface_id      = each.value.network_interfaces[0].id
+  security_group_id = module.network.swarm_managers_sec_group_id
+}
+
+resource "mgc_network_security_groups_attach" "workers_security_group_attach" {
+  for_each          = { for idx, vm in mgc_virtual_machine_instances.worker_nodes_vms : tostring(idx) => vm }
+  interface_id      = each.value.network_interfaces[0].id
+  security_group_id = module.network.swarm_managers_sec_group_id
 }
 
 resource "time_sleep" "wait_60_seconds" {
   count = var.run_ansible ? 1 : 0
   depends_on = [
-    mgc_virtual_machine_instances.manager_nodes_instances,
-    mgc_virtual_machine_instances.worker_nodes_instances,
+    mgc_virtual_machine_instances.manager_nodes_vms,
+    mgc_virtual_machine_instances.worker_nodes_vms,
   ]
   create_duration = "60s"
 }

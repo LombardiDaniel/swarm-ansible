@@ -35,7 +35,7 @@ services:
         - traefik.http.routers.registry.tls.certresolver=leresolver
 
   frontend:
-    image: joxit/docker-registry-ui:latest
+    image: joxit/docker-registry-ui:2.5.7-debian
     environment:
       NGINX_PROXY_PASS_URL: http://registry:5000
       REGISTRY_TITLE: "${DOMAIN_NAME} Private Docker Registry"

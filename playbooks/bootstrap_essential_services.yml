@@ -34,7 +34,7 @@
       ansible.builtin.shell: |
         cd {{ composes_dir }}/traefik &&
         ./replace_pass.sh {{ basic_auth_password }} &&
-        docker stack deploy -c docker-compose.yml --detach traefik
+        docker stack deploy -c docker-compose.yml traefik
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         MAINTAINER_EMAIL: "{{ maintainer_email }}"
@@ -46,7 +46,7 @@
       register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/portainer &&
-        docker stack deploy -c docker-compose.yml --detach portainer
+        docker stack deploy -c docker-compose.yml portainer
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         HOSTNAME: "{{ ansible_hostname }}"
@@ -59,7 +59,7 @@
       ansible.builtin.shell: |
         cd {{ composes_dir }}/registry &&
         sudo ./setup_passwd.sh $REGISTRY_PASSWD &&
-        docker stack deploy -c docker-compose.yml --detach registry
+        docker stack deploy -c docker-compose.yml registry
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         HOSTNAME: "{{ ansible_hostname }}"
@@ -72,32 +72,32 @@
       register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/swarm-cronjob &&
-        docker stack deploy -c docker-compose.yml --detach swarm-cronjob
+        docker stack deploy -c docker-compose.yml swarm-cronjob
       # environment:
       #   DOMAIN_NAME: "{{ domain_name }}"
 
     - name: Start shepherd stack
-      when: "'node0' in group_names"
-      failed_when: cmd_out.stderr != ""
-      changed_when: "'Error' not in cmd_out.stdout_lines"
-      register: cmd_out
-      ansible.builtin.shell: |
-        cd {{ composes_dir }}/shepherd &&
-        docker stack deploy -c docker-compose.yml --detach shepherd
-      environment:
-        DOMAIN_NAME: "{{ domain_name }}"
-        HOSTNAME: "{{ ansible_hostname }}"
-        REGISTRY_PASSWD: "{{ basic_auth_password }}"
+    #   when: "'node0' in group_names"
+    #   failed_when: cmd_out.stderr != ""
+    #   changed_when: "'Error' not in cmd_out.stdout_lines"
+    #   register: cmd_out
+    #   ansible.builtin.shell: |
+    #     cd {{ composes_dir }}/shepherd &&
+    #     docker stack deploy -c docker-compose.yml shepherd
+    #   environment:
+    #     DOMAIN_NAME: "{{ domain_name }}"
+    #     HOSTNAME: "{{ ansible_hostname }}"
+    #     REGISTRY_PASSWD: "{{ basic_auth_password }}"
 
-    - name: Start dozzle stack
-      when: "'node0' in group_names"
-      failed_when: cmd_out.stderr != ""
-      changed_when: "'Error' not in cmd_out.stdout_lines"
-      register: cmd_out
-      ansible.builtin.shell: |
-        cd {{ composes_dir }}/dozzle &&
-        docker stack deploy -c docker-compose.yml --detach dozzle
-      environment:
+    # - name: Start dozzle stack
+    #   when: "'node0' in group_names"
+    #   failed_when: cmd_out.stderr != ""
+    #   changed_when: "'Error' not in cmd_out.stdout_lines"
+    #   register: cmd_out
+    #   ansible.builtin.shell: |
+    #     cd {{ composes_dir }}/dozzle &&
+    #     docker stack deploy -c docker-compose.yml dozzle
+    #   environment:
         DOMAIN_NAME: "{{ domain_name }}"
 
     - name: Registry login

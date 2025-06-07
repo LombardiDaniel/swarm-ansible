@@ -34,7 +34,7 @@
       ansible.builtin.shell: |
         cd {{ composes_dir }}/traefik &&
         ./replace_pass.sh {{ basic_auth_password }} &&
-        docker stack deploy -c docker-compose.yml traefik
+        docker stack deploy -c docker-compose.yml traefik --detach=false
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         MAINTAINER_EMAIL: "{{ maintainer_email }}"
@@ -46,7 +46,7 @@
       register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/portainer &&
-        docker stack deploy -c docker-compose.yml portainer
+        docker stack deploy -c docker-compose.yml portainer --detach=false
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         HOSTNAME: "{{ ansible_hostname }}"
@@ -59,7 +59,7 @@
       ansible.builtin.shell: |
         cd {{ composes_dir }}/registry &&
         sudo ./setup_passwd.sh $REGISTRY_PASSWD &&
-        docker stack deploy -c docker-compose.yml registry
+        docker stack deploy -c docker-compose.yml registry --detach=false
       environment:
         DOMAIN_NAME: "{{ domain_name }}"
         HOSTNAME: "{{ ansible_hostname }}"
@@ -72,7 +72,7 @@
       register: cmd_out
       ansible.builtin.shell: |
         cd {{ composes_dir }}/swarm-cronjob &&
-        docker stack deploy -c docker-compose.yml swarm-cronjob
+        docker stack deploy -c docker-compose.yml swarm-cronjob --detach=false
       # environment:
       #   DOMAIN_NAME: "{{ domain_name }}"
 
@@ -83,7 +83,7 @@
     #   register: cmd_out
     #   ansible.builtin.shell: |
     #     cd {{ composes_dir }}/shepherd &&
-    #     docker stack deploy -c docker-compose.yml shepherd
+    #     docker stack deploy -c docker-compose.yml shepherd --detach=false
     #   environment:
     #     DOMAIN_NAME: "{{ domain_name }}"
     #     HOSTNAME: "{{ ansible_hostname }}"
@@ -96,7 +96,7 @@
     #   register: cmd_out
     #   ansible.builtin.shell: |
     #     cd {{ composes_dir }}/dozzle &&
-    #     docker stack deploy -c docker-compose.yml dozzle
+    #     docker stack deploy -c docker-compose.yml dozzle --detach=false
     #   environment:
         DOMAIN_NAME: "{{ domain_name }}"
 

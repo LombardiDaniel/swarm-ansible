@@ -12,13 +12,14 @@ services:
         # traefik routers
         - traefik.enable=true
         - traefik.http.routers.my-app.service=my-app # only needed if we are going to declare another one, needed for things such as minio (fronend and console)
+        # - traefik.http.routers.ROUTER_NAME.service=COMPOSE_SERVICE
         - traefik.http.services.my-app.loadbalancer.server.port=8080
         - traefik.http.routers.my-app.rule=Host(`my-app.example.com`)
         - traefik.http.routers.my-app.entrypoints=websecure
         - traefik.http.routers.my-app.tls=true
         - traefik.http.routers.my-app.tls.certresolver=leresolver
         # here we declare a second router for "auth" in our app
-        - traefik.http.routers.my-app-auth.service=my-app-auth
+        - traefik.http.routers.my-app-auth.service=my-app
         - traefik.http.services.my-app-auth.loadbalancer.server.port=5555
         - traefik.http.routers.my-app-auth.rule=Host(`my-app.example.com`) && Path(`/auth`)
         - traefik.http.routers.my-app-auth.entrypoints=websecure

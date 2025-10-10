@@ -1,6 +1,8 @@
 ## Terraform for MGC
 
-> Essa parte está em PT/BR
+> Esta seção está em pt/BR.
+>
+> This seccion is in pt/BR.
 
 [mgc-provider](https://registry.terraform.io/providers/MagaluCloud/mgc/latest)
 

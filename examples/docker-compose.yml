@@ -1,7 +1,19 @@
 version: "3.7"
 
+x-common: &x-common
+  environment:
+    TZ: America/Sao_Paulo
+
+x-static-volumes: &static-volumes
+  deploy:
+    placement:
+      constraints:
+        - node.role == manager
+        - node.hostname == swarm-node-0 # this is important to fix the volume
+
 services:
   my-app:
+    <<: *x-common
     image: registry.example.com/my-app:prod
     networks:
       - traefik-public
@@ -37,30 +49,23 @@ services:
       REDIS_URL: redis://cache:6379
 
   db:
+    <<:
+      - *x-common
+      - *static-volumes
     image: mariadb:10.4.12
     volumes:
       - mysql_data:/var/lib/mysql
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-          - node.hostname == swarm-node-0 # this is important to fix the volume
     networks:
       - my-app-net
 
   cache:
+    <<: *x-common
     image: redis:4
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-          - node.hostname == swarm-node-0 # this is important to fix the volume
-    volumes:
-      - redis_data:/data
     networks:
       - my-app-net
 
   proxy-service:
+    <<: *x-common
     image: nginx:alpine
     networks:
       - traefik-public

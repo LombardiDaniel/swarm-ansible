@@ -44,7 +44,7 @@ services:
       placement:
         constraints:
           - node.role == manager
-          - node.hostname == node0 # this is important to fix the volume
+          - node.hostname == swarm-node-0 # this is important to fix the volume
     networks:
       - my-app-net
 
@@ -54,7 +54,7 @@ services:
       placement:
         constraints:
           - node.role == manager
-          - node.hostname == node0 # this is important to fix the volume
+          - node.hostname == swarm-node-0 # this is important to fix the volume
     volumes:
       - redis_data:/data
     networks:

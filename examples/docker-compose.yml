@@ -11,6 +11,18 @@ x-static-volumes: &static-volumes
         - node.role == manager
         - node.hostname == swarm-node-0 # this is important to fix the volume
 
+x-arm-only: &arm-only
+  deploy:
+    placement:
+      constraints:
+        - node.platform.arch == aarch64
+
+x-intel-only: &intel-only
+  deploy:
+    placement:
+      constraints:
+        - node.platform.arch == x86_64
+
 services:
   my-app:
     <<: *x-common

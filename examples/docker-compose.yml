@@ -4,20 +4,20 @@ x-common: &x-common
   environment:
     TZ: America/Sao_Paulo
 
-x-static-volumes: &static-volumes
+x-static-volumes: &x-static-volumes
   deploy:
     placement:
       constraints:
         - node.role == manager
         - node.hostname == swarm-node-0 # this is important to fix the volume
 
-x-arm-only: &arm-only
+x-arm-only: &x-arm-only
   deploy:
     placement:
       constraints:
         - node.platform.arch == aarch64
 
-x-intel-only: &intel-only
+x-intel-only: &x-intel-only
   deploy:
     placement:
       constraints:
@@ -25,7 +25,9 @@ x-intel-only: &intel-only
 
 services:
   my-app:
-    <<: *x-common
+    <<:
+      - *x-common
+      - *x-arm-only
     image: registry.example.com/my-app:prod
     networks:
       - traefik-public
@@ -63,7 +65,8 @@ services:
   db:
     <<:
       - *x-common
-      - *static-volumes
+      - *x-static-volumes
+      - *x-intel-only
     image: mariadb:10.4.12
     volumes:
       - mysql_data:/var/lib/mysql

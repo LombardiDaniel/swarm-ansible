@@ -12,6 +12,8 @@ env:
   REGISTRY_TOKEN: password
   PORTAINER_UPDATE_URL_STAGING: staging
   PORTAINER_UPDATE_URL_PROD: prod
+  # DOCKER_IMAGE_PLATFORMS: linux/amd64,linux/arm64
+  DOCKER_IMAGE_PLATFORMS: linux/amd64
 
 jobs:
   docker:
@@ -49,7 +51,7 @@ jobs:
           # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
           # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest,${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.random_tag }}
           tags: ${{ env.REGISTRY_URL }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.branch_tag }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.DOCKER_IMAGE_PLATFORMS }}
 
       - name: Update Portainer prod
         if: steps.generate_tag.outputs.branch_tag == 'prod'
@@ -60,3 +62,12 @@ jobs:
         if: steps.generate_tag.outputs.branch_tag == 'staging'
         run: |
           curl -X POST ${{ env.PORTAINER_UPDATE_URL_STAGING }}
+
+      # - name: SSH and update
+      #   uses: cssnr/stack-deploy-action@v1
+      #   with:
+      #     host: ${{ secrets.DOCKER_CLUSTER_HOST }}
+      #     user: ${{ secrets.DOCKER_CLUSTER_USER }}
+      #     ssh_key: ${{ secrets.DOCKER_CLUSTER_SSH_PRIVATE_KEY }}
+      #     file: "docker-compose.swarm.yml"
+      #     name: "${{ github.event.repository.name }}" # stack name is same as repo

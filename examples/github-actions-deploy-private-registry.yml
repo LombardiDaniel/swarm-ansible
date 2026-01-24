@@ -7,7 +7,11 @@ on:
       - staging
 
 env:
-  REGISTRY_URL: YOUR_REGISTRY_URL
+  REGISTRY_URL: container-registry.br-se1.magalu.cloud/your_repo
+  REGISTRY_USERNAME: username
+  REGISTRY_TOKEN: password
+  PORTAINER_UPDATE_URL_STAGING: staging
+  PORTAINER_UPDATE_URL_PROD: prod
 
 jobs:
   docker:
@@ -26,8 +30,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY_URL }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_TOKEN }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_TOKEN }}
 
       - name: Generate random tag
         id: generate_tag
@@ -44,14 +48,15 @@ jobs:
           push: true
           # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
           # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest,${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.random_tag }}
-          tags: ${{ REGISTRY_URL }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.branch_tag }}
+          tags: ${{ env.REGISTRY_URL }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.branch_tag }}
           platforms: linux/amd64,linux/arm64
 
-      # - name: SSH and update
-      #   uses: cssnr/stack-deploy-action@v1
-      #   with:
-      #     host: ${{ secrets.DOCKER_CLUSTER_HOST }}
-      #     user: ${{ secrets.DOCKER_CLUSTER_USER }}
-      #     ssh_key: ${{ secrets.DOCKER_CLUSTER_SSH_PRIVATE_KEY }}
-      #     file: "docker-compose.swarm.yml"
-      #     name: "${{ github.event.repository.name }}" # stack name is same as repo
+      - name: Update Portainer prod
+        if: steps.generate_tag.outputs.branch_tag == 'prod'
+        run: |
+          curl -X POST ${{ env.PORTAINER_UPDATE_URL_PROD }}
+
+      - name: Update Portainer staging
+        if: steps.generate_tag.outputs.branch_tag == 'staging'
+        run: |
+          curl -X POST ${{ env.PORTAINER_UPDATE_URL_STAGING }}

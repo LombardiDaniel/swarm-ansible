@@ -3,7 +3,14 @@ name: ci
 on:
   push:
     branches:
-      - "main"
+      - prod
+      - staging
+
+env:
+  REGISTRY_USERNAME: username
+  REGISTRY_TOKEN: password
+  PORTAINER_UPDATE_URL_STAGING: staging
+  PORTAINER_UPDATE_URL_PROD: prod
 
 jobs:
   docker:
@@ -11,15 +18,18 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ env.REGISTRY_USERNAME }}
+          password: ${{ env.REGISTRY_TOKEN }}
 
       - name: Generate random tag
         id: generate_tag
@@ -32,14 +42,19 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          target: server
+          # target: server  # for multi-stage builds
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          # tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest,${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.random_tag }}
+          tags: ${{ env.REGISTRY_URL }}/${{ github.event.repository.name }}:${{ steps.generate_tag.outputs.branch_tag }}
           platforms: linux/amd64,linux/arm64
 
-      - name: Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+      - name: Update Portainer prod
+        if: steps.generate_tag.outputs.branch_tag == 'prod'
+        run: |
+          curl -X POST ${{ env.PORTAINER_UPDATE_URL_PROD }}
+
+      - name: Update Portainer staging
+        if: steps.generate_tag.outputs.branch_tag == 'staging'
+        run: |
+          curl -X POST ${{ env.PORTAINER_UPDATE_URL_STAGING }}

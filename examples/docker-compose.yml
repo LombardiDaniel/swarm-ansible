@@ -40,6 +40,7 @@ services:
         - traefik.http.routers.my-app.service=my-app # only needed if we are going to declare another one, needed for things such as minio (fronend and console)
         # - traefik.http.routers.ROUTER_NAME.service=COMPOSE_SERVICE
         - traefik.http.services.my-app.loadbalancer.server.port=8080
+        - traefik.http.services.my-app.loadbalancer.strategy=p2c # you can also set loadbalancing strategies
         - traefik.http.routers.my-app.rule=Host(`my-app.example.com`)
         - traefik.http.routers.my-app.entrypoints=websecure
         - traefik.http.routers.my-app.tls=true
